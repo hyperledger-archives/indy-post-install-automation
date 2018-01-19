@@ -85,16 +85,19 @@ class TestRunner:
         :return: number of tests pass and fail
         """
         tests_pass = tests_fail = 0
+        queue_of_result = multiprocessing.Queue()
         for test in lst_tests:
-            (parent_channel, child_channel) = multiprocessing.Pipe()
             process = multiprocessing.Process(
                 target=TestRunner.__helper_execute_test,
                 kwargs={"test_cls": test,
                         "time_out": self.__args.timeout,
-                        "channel": child_channel})
+                        "channel": queue_of_result})
             process.start()
-            temp_result = parent_channel.recv()
             process.join()
+            temp_result = {}
+            if not queue_of_result.empty():
+                temp_result = queue_of_result.get_nowait()
+
             if "status" in temp_result:
                 if temp_result["status"] == result.Status.PASSED:
                     tests_pass += 1
@@ -193,7 +196,7 @@ class TestRunner:
             temp["json_path"] = test_case.test_result.get_json_file_path()
             temp["log_path"] = test_case.logger.get_log_file_path()
 
-        channel.send(temp)
+        channel.put_nowait(temp)
 
 
 if __name__ == "__main__":

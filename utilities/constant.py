@@ -80,6 +80,7 @@ xyz_claim = {
 
 signature_type = "CL"
 secret_name = "Master secret"
+claim_uuid_key = "claim_uuid"   # Change to "referent" in next build
 
 # The path to the genesis transaction file is configurable.
 # The default directory is "/var/lib/indy/sandbox/".
@@ -157,3 +158,17 @@ class Role(str, Enum):
     TRUST_ANCHOR = "TRUST_ANCHOR"
     TGB = "TGB"  # obsolete.
     NONE = ""
+
+
+class KeysForRevocation(str, Enum):
+    G = "g"
+    G_DASH = "g_dash"
+    H = "h"
+    H0 = "h0"
+    H1 = "h1"
+    H2 = "h2"
+    H_TILDE = "htilde"
+    H_CAP = "h_cap"
+    U = "u"
+    PK = "pk"
+    Y = "y"

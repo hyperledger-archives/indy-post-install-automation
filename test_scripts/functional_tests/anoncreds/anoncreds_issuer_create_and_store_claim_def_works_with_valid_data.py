@@ -15,10 +15,8 @@ class TestIssuerCreateAndStoreClaimDefWithValidData(AnoncredsTestBase):
     async def execute_test_steps(self):
         # 1. Create wallet.
         # 2. Open wallet.
-        self.wallet_handle = await \
-            common.create_and_open_wallet_for_steps(self.steps,
-                                                    self.wallet_name,
-                                                    self.pool_name)
+        self.wallet_handle = await common.create_and_open_wallet_for_steps(
+            self.steps, self.wallet_name, self.pool_name)
 
         # 3. Create 'issuer_did'.
         self.steps.add_step("Create 'issuer_did'")
@@ -30,12 +28,10 @@ class TestIssuerCreateAndStoreClaimDefWithValidData(AnoncredsTestBase):
         # returned result as 'claim_def'.
         self.steps.add_step("Create and store claim definition and "
                             "store returned result as 'claim_def'")
-        claim_def = await \
-            utils.perform(self.steps,
-                          anoncreds.issuer_create_and_store_claim_def,
-                          self.wallet_handle, issuer_did,
-                          json.dumps(constant.gvt_schema),
-                          constant.signature_type, False)
+        claim_def = await utils.perform(
+            self.steps, anoncreds.issuer_create_and_store_claim_def,
+            self.wallet_handle, issuer_did, json.dumps(constant.gvt_schema),
+            constant.signature_type, False)
 
         claim_def_primary = json.loads(claim_def)['data']['primary']
 

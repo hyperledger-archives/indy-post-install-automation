@@ -52,7 +52,8 @@ class TestEncryptSealedWithNymFromLedger(TestScenarioBase):
                             my_did, identity_request)
 
         # 9. Encrypt message by 'signus.encrypt_sealed'
-        self.steps.add_step("Encrypt message by 'signus.encrypt_sealed'")
+        self.steps.add_step("Encrypt message by 'signus.encrypt_sealed' -> "
+                            "Bug: https://jira.hyperledger.org/browse/IS-508")
         message = "Test signus".encode("utf-8")
         (encrypted_message, nonce) = await utils.perform(
             self.steps, signus.encrypt_sealed, self.wallet_handle,

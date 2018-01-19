@@ -39,7 +39,8 @@ class VerifyMessagesOnConnection(TestScenarioBase):
 
     async def execute_test_steps(self):
         # 1. Create ledger config from genesis txn file
-        self.steps.add_step("Create Ledger")
+        self.steps.add_step("Create Ledger -> "
+                            "Bug: https://jira.hyperledger.org/browse/IS-332")
         pool_config = json.dumps(
             {"genesis_txn": str(self.pool_genesis_txn_file)})
         self.pool_handle = await perform(self.steps,

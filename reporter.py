@@ -31,7 +31,8 @@ def get_version(program: str) -> str:
     version = result.split()
 
     if len(version) >= 3:
-        return version[2]
+        if version[1] == program:
+            return version[2]
     return "Cannot find version for '{}'".format(program)
 
 
@@ -86,7 +87,7 @@ class HTMLReporter:
                 }
 
                 .passedodd td {
-                    background-color: #3F3
+                    background-color: #0A0
                 }
 
                 .passedeven td {
@@ -102,7 +103,7 @@ class HTMLReporter:
                 }
 
                 .failedodd td, .attn {
-                    background-color: #F33
+                    background-color: #D00
                 }
 
                 .failedeven td, .stripe .attn {
@@ -178,12 +179,27 @@ class HTMLReporter:
                                            <td rowspan="1">{}</td>
                                        </tr>"""
 
+    __passedodd_testcase_template = """<tr class="passedodd">
+                                               <td rowspan="1">{}</td>
+                                               <td>Passed</td>
+                                               <td rowspan="1">{}</td>
+                                               <td rowspan="1">{}</td>
+                                           </tr>"""
+
     __failed_testcase_template = """<tr class="failedeven">
                                             <td rowspan="1">{}</td>
-                                            <td><a href='#{}'>Failed</a></td>
+                                            <td><a href='#{}'s>Failed</a></td>
                                             <td rowspan="1">{}</td>
                                             <td rowspan="1">{}</td>
                                         </tr>"""
+
+    __failedodd_testcase_template = """<tr class="failedodd">
+                                                <td rowspan="1">{}</td>
+                                                <td><a href='#{}'>Failed</a>
+                                                </td>
+                                                <td rowspan="1">{}</td>
+                                                <td rowspan="1">{}</td>
+                                            </tr>"""
 
     __summary_head = """<h2>Test Summary</h2>
             <table id="summary" border='1' width='800'>
@@ -233,6 +249,16 @@ class HTMLReporter:
                 </td>
             </tr>
             """
+    # Define some variable to support generate summary json file.
+    __system_info = '{{"system_info":{{"run_machine":"{}","OS":"{}",' \
+                    '"indy_plenum":"{}","indy_anoncreds":"{}",' \
+                    '"indy_node":"{}","sovrin":"{}"}}}}'
+    __test_plan = '{{"testplan":{{"total":{},"Passed":{},"Failed":{},' \
+                  '"Duration":{}}}}}'
+    passed = 0
+    failed = 0
+    time_duration = 0
+    total_testcases = 0
 
     def make_suite_name(self, suite_name):
         """
@@ -264,10 +290,8 @@ class HTMLReporter:
         if not list_json:
             return
 
-        passed = 0
-        failed = 0
-        total = 0
         list_json.sort()
+        self.total_testcases = len(list_json)
         for js in list_json:
             with open(js) as json_file:
                 json_text = json.load(json_file)
@@ -279,11 +303,13 @@ class HTMLReporter:
                 duration = json_text['duration']
 
                 # statictic Table items
-                total = total + int(duration)
+                self.time_duration = self.time_duration + int(duration)
                 if result == "Passed":
-                    passed = passed + 1
-
-                    temp_testcase = self.__passed_testcase_template
+                    self.passed = self.passed + 1
+                    if self.passed % 2 == 0:
+                        temp_testcase = self.__passed_testcase_template
+                    else:
+                        temp_testcase = self.__passedodd_testcase_template
                     temp_testcase = temp_testcase.format(testcase, starttime,
                                                          str(duration))
 
@@ -292,9 +318,11 @@ class HTMLReporter:
                         self.__passed_testcase_table + temp_testcase
 
                 elif result == "Failed":
-                    failed = failed + 1
-
-                    temp_testcase = self.__failed_testcase_template
+                    self.failed = self.failed + 1
+                    if self.passed % 2 == 0:
+                        temp_testcase = self.__failed_testcase_template
+                    else:
+                        temp_testcase = self.__failedodd_testcase_template
                     temp_testcase = \
                         temp_testcase.format(testcase,
                                              testcase.replace(" ", ""),
@@ -328,13 +356,14 @@ class HTMLReporter:
                             self.__table_test_log_content + temp
 
                     self.__table_test_log_content = \
-                        self.__table_test_log_content + self.__end_table +\
+                        self.__table_test_log_content + self.__end_table + \
                         self.__go_to_summary
 
-        self.__statictics_table = self.__statictics_table.format(suite_name,
-                                                                 str(passed),
-                                                                 str(failed),
-                                                                 str(total))
+        self.__statictics_table = self.__statictics_table.format(
+            suite_name,
+            str(self.passed),
+            str(self.failed),
+            str(self.time_duration))
 
     def __init__(self):
         HTMLReporter.__init_report_folder()
@@ -373,6 +402,32 @@ class HTMLReporter:
             self.__end_file)
 
         f.close()
+        summary_json_file = self.__report_dir + report_file_name + ".json"
+        self.__generate_json_summary(json_files, summary_json_file)
+
+    def __generate_json_summary(self, list_json, summary_json_file):
+        list_data = []
+        list_json.sort()
+        for js in list_json:
+            data = open(js, "r").read()
+            data = data + "\n"
+            list_data.append(data)
+        self.__write_result(list_data, summary_json_file)
+
+    def __write_result(self, list_data, summary_json_file):
+        summary_json = open(summary_json_file, "w")
+        system_info = self.__system_info.format(socket.gethostname(),
+                                                platform.system() +
+                                                platform.release(),
+                                                get_version("indy-plenum"),
+                                                get_version("indy-anoncreds"),
+                                                get_version("indy-node"),
+                                                get_version("sovrin"))
+        test_plan = self.__test_plan.format(self.total_testcases, self.passed,
+                                            self.failed, self.time_duration)
+        summary_json.write(system_info + "\n" + test_plan + "\n")
+        summary_json.writelines(list_data)
+        summary_json.close()
 
     def generate_report_from_filter(self, file_filter):
         """

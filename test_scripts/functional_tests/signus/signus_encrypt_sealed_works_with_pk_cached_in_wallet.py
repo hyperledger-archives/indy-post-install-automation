@@ -33,8 +33,9 @@ class TestEncryptSealedWithPkInWallet(SignusTestBase):
         await utils.perform(self.steps, signus.store_their_did,
                             self.wallet_handle, their_did_json)
 
-        # 5. Encrypte message by 'signus.encrypt_sealed'
-        self.steps.add_step("Encrypte message by 'signus.encrypt_sealed'")
+        # 5. Encrypt message by 'signus.encrypt_sealed'
+        self.steps.add_step("Encrypt message by 'signus.encrypt_sealed' -> "
+                            "Bug: https://jira.hyperledger.org/browse/IS-508")
         message = "Test signus".encode("utf-8")
         (encrypted_message, nonce) = await utils.perform(
             self.steps, signus.encrypt_sealed, self.wallet_handle, -1,

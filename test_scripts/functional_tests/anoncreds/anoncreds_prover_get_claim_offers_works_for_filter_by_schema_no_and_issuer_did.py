@@ -5,7 +5,7 @@ Created on Dec 19, 2017
 """
 
 import json
-from indy import anoncreds, signus
+from indy import anoncreds
 from utilities import utils, constant, common
 from test_scripts.functional_tests.anoncreds.anoncreds_test_base \
     import AnoncredsTestBase
@@ -16,22 +16,15 @@ class TestProverGetClaimOffersForFilterBySchemaSeqAndIssuerDid\
     async def execute_test_steps(self):
         # 1. Create wallet.
         # 2. Open wallet.
-        self.wallet_handle = await \
-            common.create_and_open_wallet_for_steps(self.steps,
-                                                    self.wallet_name,
-                                                    self.pool_name)
+        self.wallet_handle = await common.create_and_open_wallet_for_steps(
+            self.steps, self.wallet_name, self.pool_name)
 
         # 3. Create 'issuer_did1'.
-        self.steps.add_step("Create 'issuer_did1'")
-        (issuer_did1, _) = await utils.perform(self.steps,
-                                               signus.create_and_store_my_did,
-                                               self.wallet_handle, "{}")
-
         # 4. Create 'issuer_did2'.
-        self.steps.add_step("Create 'issuer_did2'")
-        (issuer_did2, _) = await utils.perform(self.steps,
-                                               signus.create_and_store_my_did,
-                                               self.wallet_handle, "{}")
+        ((issuer_did1, _),
+         (issuer_did2, _)) = await common.create_and_store_dids_and_verkeys(
+            self.steps, self.wallet_handle, number=2,
+            step_descriptions=["Create 'issuer_did1'", "Create 'issuer_did2'"])
 
         # 5. Create and store claim definition.
         self.steps.add_step("Create and store claim definition")

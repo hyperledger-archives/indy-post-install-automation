@@ -6,6 +6,7 @@ Created on Nov 9, 2017
 Containing all functions used by several test steps on test scenarios.
 """
 import os
+import json
 from indy.error import IndyError
 from utilities import constant
 from utilities.result import Status
@@ -271,7 +272,7 @@ def check(steps: Steps, error_message: str, condition) -> bool:
     return False
 
 
-def create_claim_offer(issuer_did: str="", schema_seq: int=None) -> dict:
+def create_claim_offer(issuer_did: str = "", schema_seq: int = None) -> dict:
     """
     Return a claim offer.
     :param issuer_did: create by signus.create_and_store_did.
@@ -288,7 +289,7 @@ def create_claim_offer(issuer_did: str="", schema_seq: int=None) -> dict:
     return result
 
 
-def create_gotten_pairwise_json(my_did: str=None, metadata=None) -> dict:
+def create_gotten_pairwise_json(my_did: str = None, metadata=None) -> dict:
     """
     Return a pairwise json that gotten from wallet.
     :param my_did:
@@ -303,3 +304,80 @@ def create_gotten_pairwise_json(my_did: str=None, metadata=None) -> dict:
         result['metadata'] = metadata
 
     return result
+
+
+def check_claim_attrs(claim_attrs, expected_claim):
+    """
+    Check if field 'attrs' in gotten claim matches with expected claim json.
+
+    :param claim_attrs: value of field 'attrs' in gotten claim.
+    :param expected_claim:
+    :return: True of False.
+    """
+    for key in expected_claim.keys():
+        if claim_attrs[key] != expected_claim[key][0]:
+            return False
+    return True
+
+
+def check_gotten_claim_is_valid(steps, gotten_claim, expected_claim_json,
+                                issuer_did, schema_no):
+    """
+    Check if a gotten claim is valid.
+
+    :param steps: steps of test case.
+    :param gotten_claim: return by 'anoncreds.prover_get_claims'.
+    :param expected_claim_json: claim json that match with claim in wallet.
+    :param issuer_did: return by 'signus.create_and_store_my_did'.
+    :param schema_no: schema sequence number.
+    :return: True or False.
+    """
+    # Check lst_claims[0]['claim_uuid'].
+    steps.add_step("Check lst_claims[0]['{}']".format(constant.claim_uuid_key))
+    err_msg = "Claim's uuid is empty"
+    check(steps, error_message=err_msg,
+          condition=lambda: len(gotten_claim["claim_uuid"]) > 0)
+
+    # Check lst_claims[0]['attrs'].
+    steps.add_step("Check lst_claims[0]['attrs']")
+    claim_attrs = gotten_claim["attrs"]
+    err_msg = "lst_claims[0]['attrs'] mismatches"
+    check(steps, error_message=err_msg,
+          condition=lambda: check_claim_attrs(claim_attrs,
+                                              expected_claim_json))
+
+    # Check lst_claims[0]['issuer_did'].
+    steps.add_step("Check lst_claims[0]['issuer_did']")
+    err_msg = "Issuer's did mismatches"
+    check(steps, error_message=err_msg,
+          condition=lambda: gotten_claim["issuer_did"] == issuer_did)
+
+    # Check lst_claims[0]['issuer_did'].
+    steps.add_step("Check lst_claims[0]['issuer_did']")
+    err_msg = "Issuer's did mismatches"
+    check(steps, error_message=err_msg,
+          condition=lambda: gotten_claim["schema_seq_no"] ==
+          schema_no)
+
+
+def create_proof_req(nonce: str, name: str, version: str,
+                     requested_attrs: dict=None,
+                     requested_predicates: dict=None) -> str:
+    """
+    Create a proof request.
+
+    :param nonce: a number that unique within wallet.
+    :param name: name of proof request (unique).
+    :param version: version of proof request.
+    :param requested_attrs:
+            example: {"attr1_referent": {"name": <attr_name>}}
+    :param requested_predicates:
+            example: {"predicate1_referent": {"attr_name": <attr_name>,
+                                              "p_type": <operator>,
+                                              "value": "expected_value"}}
+    :return: proof request.
+    """
+
+    return json.dumps({"nonce": nonce, "name": name, "version": version,
+                       "requested_attrs": requested_attrs,
+                       "requested_predicates": requested_predicates})
