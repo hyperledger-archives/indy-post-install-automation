@@ -40,7 +40,7 @@ class VerifyMessagesOnConnection(TestScenarioBase):
     async def execute_test_steps(self):
         # 1. Create ledger config from genesis txn file
         self.steps.add_step("Create Ledger -> "
-                            "Bug: https://jira.hyperledger.org/browse/IS-332")
+                            "Bug: https://jira.hyperledger.org/browse/IS-517")
         pool_config = json.dumps(
             {"genesis_txn": str(self.pool_genesis_txn_file)})
         self.pool_handle = await perform(self.steps,
@@ -49,13 +49,13 @@ class VerifyMessagesOnConnection(TestScenarioBase):
 
         # 2. Open pool ledger -------------------------------------------------
         self.steps.add_step("Open pool ledger")
-        bug_is332 = "Bug: https://jira.hyperledger.org/browse/IS-332"
-        message_2 = "Failed due to the Bug IS-332" + "\n" + bug_is332
+        bug_is517 = "Bug: https://jira.hyperledger.org/browse/IS-517"
+        message_2 = "Failed due to the Bug IS-517" + "\n" + bug_is517
         self.steps.get_last_step().set_status(Status.FAILED, message_2)
 
         # 3. verifying the message --------------------------------------------
         self.steps.add_step("verifying the message")
-        message_3 = "TODO after fix IS-332"
+        message_3 = "TODO after fix IS-517"
         self.steps.get_last_step().set_status(Status.FAILED, message_3)
 
 
