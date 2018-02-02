@@ -100,7 +100,7 @@ optional arguments:
 ```
     python3.5 Automation-Tests/reporter.py -n *wallet*
 ```
-- Get the summary report using the date
+- Get the summary report on a giving date
 ```
     python3.5 Automation-Tests/reporter.py -n *2017-12-14*
 ``` 
