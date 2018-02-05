@@ -36,6 +36,121 @@ def get_version(program: str) -> str:
     return "Cannot find version for '{}'".format(program)
 
 
+class JsonSummaryReport:
+    __default_dir = os.path.dirname(os.path.abspath(__file__))
+
+    __json_dir = __default_dir + "/test_output/test_results/"
+
+    __report_dir = __default_dir + "/reporter_summary_report/"
+
+    __dependencies = ["indy-plenum", "indy-node", "indy-anoncreds", "sovrin"]
+
+    __SYSTEM = "system_info"
+    __OS = "os"
+    __HOST_NAME = "host_name"
+    __RESULTS = "test_results"
+    __SUMMARY = "summary"
+    __TOTAL_TESTS = "total_tests"
+    __PASSED_TESTS = "passed_tests"
+    __FAILED_TESTS = "failed_tests"
+    __DURATION = "duration"
+
+    def __init__(self):
+        JsonSummaryReport.__init_report_folder()
+        self.__json_content = dict()
+
+    def generate_report_from_file(self, json_files: list):
+        """
+        Generate report from an list of json files.
+
+        :param json_files:
+        """
+        report_file_name = JsonSummaryReport.__make_report_name()
+
+        # Write to file.
+        summary_json_file = self.__report_dir + report_file_name + ".json"
+        self.__make_system_info()
+        self.__make_result(json_files)
+
+        # With json summary to file.
+        with open(summary_json_file, "w+") as json_summary:
+            json.dump(self.__json_content, json_summary,
+                      ensure_ascii=False, indent=2, sort_keys=True)
+
+    def generate_report_from_filter(self, file_filter):
+        """
+        Generate report form filter.
+
+        :param file_filter:
+        :return:
+        """
+        file_filter = "*" if not file_filter else file_filter
+        list_file_name = glob.glob(self.__json_dir + file_filter + ".json")
+        if not list_file_name:
+            print("Cannot find any json at {}".format(
+                JsonSummaryReport.__json_dir))
+            return
+
+        self.generate_report_from_file(list_file_name)
+
+    def __make_system_info(self):
+        system_info = dict()
+        system_info[JsonSummaryReport.__HOST_NAME] = socket.gethostname()
+        system_info[JsonSummaryReport.__OS] = (platform.system() +
+                                               platform.release())
+
+        for dependency in JsonSummaryReport.__dependencies:
+            system_info[dependency] = get_version(dependency)
+
+        self.__json_content[JsonSummaryReport.__SYSTEM] = system_info
+
+    def __make_result(self, list_files):
+        test_results = list()
+        test_passed = test_failed = 0
+        total = len(list_files)
+        duration = 0
+        for file in list_files:
+            test_result = json.load(open(file))
+            if test_result["result"].lower() == "passed":
+                test_passed += 1
+            else:
+                test_failed += 1
+            duration += test_result["duration"]
+            test_results.append(test_result)
+
+        # Make summary.
+        summary = dict()
+        summary[JsonSummaryReport.__TOTAL_TESTS] = total
+        summary[JsonSummaryReport.__PASSED_TESTS] = test_passed
+        summary[JsonSummaryReport.__FAILED_TESTS] = test_failed
+        summary[JsonSummaryReport.__DURATION] = duration
+
+        self.__json_content[JsonSummaryReport.__SUMMARY] = summary
+        self.__json_content[JsonSummaryReport.__RESULTS] = test_results
+
+    @staticmethod
+    def __make_report_name() -> str:
+        """
+        Generate report name.
+        :return: report name.
+        """
+        name = "Summary_{}".format(str(time.strftime("%Y-%m-%d_%H-%M-%S")))
+
+        return name
+
+    @staticmethod
+    def __init_report_folder():
+        """
+        Create reporter_summary_report directory if it not exist.
+        :raise OSError.
+        """
+        try:
+            os.makedirs(JsonSummaryReport.__report_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise e
+
+
 class HTMLReporter:
     __default_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -202,7 +317,7 @@ class HTMLReporter:
                                             </tr>"""
 
     __summary_head = """<h2>Test Summary</h2>
-            <table id="summary" border='1' width='800'>
+            <table id="summary" border="1">
             <thead>
             <tr>
                 <th>Test Case</th>
@@ -340,14 +455,14 @@ class HTMLReporter:
                         self.__table_test_log_content + test_log
 
                     # loop for each step
-                    for i in range(0, len(json_text['run'])):
-                        step = json_text['run'][i]['step']
-                        status = json_text['run'][i]['status']
-                        if json_text['run'][i]['status'] == "Passed":
+                    for i in range(0, len(json_text['teststeps'])):
+                        step = json_text['teststeps'][i]['step']
+                        status = json_text['teststeps'][i]['status']
+                        if json_text['teststeps'][i]['status'] == "Passed":
                             temp = self.__passed_test_log.format(str(i + 1),
                                                                  step, status)
                         else:
-                            message = json_text['run'][i]['message']
+                            message = json_text['teststeps'][i]['message']
                             temp = self.__failed_test_log.format(str(i + 1),
                                                                  step, status,
                                                                  message)
@@ -402,8 +517,6 @@ class HTMLReporter:
             self.__end_file)
 
         f.close()
-        summary_json_file = self.__report_dir + report_file_name + ".json"
-        self.__generate_json_summary(json_files, summary_json_file)
 
     def __generate_json_summary(self, list_json, summary_json_file):
         list_data = []
@@ -468,7 +581,8 @@ class HTMLReporter:
 
 
 if __name__ == "__main__":
-    reporter = HTMLReporter()
+    json_reporter = JsonSummaryReport()
+    htmt_reporter = HTMLReporter()
     # Get argument from sys.argv to make filters
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("-n", "--name", dest="name", nargs="?",
@@ -477,4 +591,5 @@ if __name__ == "__main__":
     json_filter = args.name
 
     # Generate a html report
-    reporter.generate_report_from_filter(json_filter)
+    json_reporter.generate_report_from_filter(json_filter)
+    htmt_reporter.generate_report_from_filter(json_filter)

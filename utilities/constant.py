@@ -38,7 +38,6 @@ gvt_schema = {
         "name": "gvt",
         "version": "1.0",
         "attr_names": ["age", "sex", "height", "name"],
-        "keys": ["age", "sex", "height", "name"]
     }
 }
 

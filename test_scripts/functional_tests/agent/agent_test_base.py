@@ -12,24 +12,18 @@ from utilities.test_scenario_base import TestScenarioBase
 
 
 class AgentTestBase(TestScenarioBase):
-    def __init__(self):
-        if self.__class__ is not AgentTestBase:
-            super().__init__()
-            self.message = "Test agent".encode("utf-8")
-            self.sender_verkey = None
-            self.recipient_verkey = None
-            self.encrypted_msg = None
 
-    async def execute_precondition_steps(self):
+    message = "Test agent".encode("utf-8")
+    sender_verkey = None
+    recipient_verkey = None
+    encrypted_msg = None
+
+    async def setup_steps(self):
         common.delete_wallet_folder(self.wallet_name)
 
-    async def execute_postcondition_steps(self):
+    async def teardown_steps(self):
         await common.close_and_delete_wallet(self.wallet_name,
                                              self.wallet_handle)
-
-    def execute_scenario(self, time_out=None):
-        if self.__class__ is not AgentTestBase:
-            super().execute_scenario(time_out)
 
     async def _parsed_and_check_encrypted_msg(self):
         # Parse encrypted_message.

@@ -1,8 +1,6 @@
 """
 Created on Nov 9, 2017
-
 @author: khoi.ngo
-
 Containing all functions used by several test steps on test scenarios.
 """
 import os
@@ -16,7 +14,6 @@ from utilities.step import Steps
 def generate_random_string(prefix="", suffix="", size=20):
     """
     Generate random string .
-
     :param prefix:  (optional) Prefix of a string.
     :param suffix:  (optional) Suffix of a string.
     :param size: (optional) Max length of a string (include prefix and suffix)
@@ -37,17 +34,13 @@ def generate_random_string(prefix="", suffix="", size=20):
     return result
 
 
-def exit_if_exception(result):
+def get_project_path():
     """
-    If "result" is an exception then raise the "result".
-    Unless "result" is an exception then return the "result".
-    :param result: the value that you want to check.
-    :return: "result" if it is not an exception.
+    return the path of the project directory.
     """
-    if isinstance(result, IndyError) or (isinstance(result, Exception)):
-        exit(1)
-    else:
-        return result
+    file_path = os.path.abspath(__file__)
+    root_dir = os.path.join(os.path.dirname(file_path), "..")
+    return os.path.abspath(root_dir)
 
 
 def compare_json(js1, js2):
@@ -64,7 +57,6 @@ async def perform(steps, func, *args, ignore_exception=False):
     """
     Execute an function and set status, message for the last test step depend
     on the result of the function.
-
     :param steps: list of test steps.
     :param func: executed function.
     :param args: argument of function.
@@ -89,16 +81,17 @@ async def perform(steps, func, *args, ignore_exception=False):
     return result
 
 
-async def perform_with_expected_code(steps, func, *args, expected_code=0):
+async def perform_with_expected_code(steps, func, *args, expected_code=0,
+                                     ignore_exception=False):
     """
     Execute the "func" with expectation that the "func" raise an IndyError that
     IndyError.error_code = "expected_code".
-
     :param steps: list of test steps.
     :param func: executed function.
     :param args: arguments of "func".
     :param expected_code: (optional) the error code that you expect
                           in IndyError.
+    :param ignore_exception: (optional) raise exception or not.
     :return: exception if the "func" raise it without "expected_code".
              'None' if the "func" run without any exception of the exception
              contain "expected_code".
@@ -107,28 +100,35 @@ async def perform_with_expected_code(steps, func, *args, expected_code=0):
         await func(*args)
         message = "Expected exception %s but not." % str(expected_code)
         steps.get_last_step().set_status(Status.FAILED, message)
-        return None
+
+        if not ignore_exception:
+            result = ValueError(message)
+        else:
+            result = None
+
     except IndyError as E:
         if E.error_code == expected_code:
             steps.get_last_step().set_status(Status.PASSED)
-            return True
+            result = True
         else:
             print_error(constant.INDY_ERROR.format(str(E)))
             steps.get_last_step().set_status(Status.FAILED, str(E))
-            return E
+            result = E
     except Exception as Ex:
         print_error(constant.EXCEPTION.format(str(Ex)))
         steps.get_last_step().set_status(Status.FAILED, str(Ex))
-        return Ex
+        result = Ex
+
+    if isinstance(result, BaseException) and not ignore_exception:
+        raise result
+    return result
 
 
 def run_async_method(method, time_out=None):
     """
     Run async method until it complete or until the time is over.
-
     :param method: The method want to run with event loop.
     :param time_out:
-
     @note: We can customize this method to adapt different situations
            in the future.
     """
@@ -141,33 +141,38 @@ def run_async_method(method, time_out=None):
         loop.run_until_complete(asyncio.wait_for(method(), time_out))
 
 
-def make_final_result(test_result, steps, begin_time, logger):
+def make_final_result(test_result, steps, begin_time):
     """
     Making a test result.
-
     :param test_result: the object result was collected into test case.
     :param steps: list of steps.
     :param begin_time: time that the test begin.
-    :param logger: The object captures screen log.
     """
     import time
+    import pytest
+    if pytest.current_exception:
+        steps[-1].set_status(Status.FAILED, pytest.current_exception)
+    test_failed = False
     for step in steps:
         test_result.add_step(step)
         if step.get_status() == Status.FAILED:
             print('%s: ' % str(step.get_id()) + constant.Color.FAIL +
                   'failed\nMessage: ' + step.get_message() +
                   constant.Color.ENDC)
-            test_result.set_test_failed()
+            test_failed = True
+
+    if not test_failed:
+        test_result.set_test_passed()
+    else:
+        test_result.set_test_failed()
 
     test_result.set_duration(time.time() - begin_time)
     test_result.write_result_to_file()
-    logger.save_log(test_result.get_test_status())
 
 
 def verify_json(steps, expected_response, response):
     """
     Verify two json are equal.
-
     :param steps: list step of test case.
     :param expected_response: expected json.
     :param response: actual json.
@@ -183,7 +188,6 @@ def verify_json(steps, expected_response, response):
 def check_pool_exist(pool_name: str) -> bool:
     """
     Check whether pool config exist or not.
-
     :param pool_name:
     :return: bool
     """
@@ -195,17 +199,16 @@ def check_pool_exist(pool_name: str) -> bool:
 def print_with_color(message: str, color: str):
     """
     Print a message with specified color onto console.
-
     :param message:
     :param color:
     """
-    print(color + message + constant.Color.ENDC)
+    import sys
+    print(color + message + constant.Color.ENDC, file=sys.stderr)
 
 
 def print_error(message: str):
     """
     Print message onto console with "Fail" color.
-
     :param message:
     """
     print_with_color(message, constant.Color.FAIL)
@@ -214,7 +217,6 @@ def print_error(message: str):
 def print_header(message: str):
     """
     Print message onto console with "Header" color.
-
     :param message:
     """
     print_with_color(message, constant.Color.HEADER)
@@ -223,7 +225,6 @@ def print_header(message: str):
 def print_ok_green(message: str):
     """
     Print message onto console with "OK_GREEN" color.
-
     :param message:
     """
     print_with_color(message, constant.Color.OKGREEN)
@@ -232,7 +233,6 @@ def print_ok_green(message: str):
 def print_ok_blue(message: str):
     """
     Print message onto console with "OK_BLUE" color.
-
     :param message:
     """
     print_with_color(message, constant.Color.OKBLUE)
@@ -251,7 +251,6 @@ def check(steps: Steps, error_message: str, condition) -> bool:
     """
     Check if the condition are return True.
     Set message into last step if the condition return False.
-
     :param steps: list step of test case.
     :param error_message: message to set if condition return False.
     :param condition: a callable.
@@ -309,7 +308,6 @@ def create_gotten_pairwise_json(my_did: str = None, metadata=None) -> dict:
 def check_claim_attrs(claim_attrs, expected_claim):
     """
     Check if field 'attrs' in gotten claim matches with expected claim json.
-
     :param claim_attrs: value of field 'attrs' in gotten claim.
     :param expected_claim:
     :return: True of False.
@@ -324,7 +322,6 @@ def check_gotten_claim_is_valid(steps, gotten_claim, expected_claim_json,
                                 issuer_did, schema_no):
     """
     Check if a gotten claim is valid.
-
     :param steps: steps of test case.
     :param gotten_claim: return by 'anoncreds.prover_get_claims'.
     :param expected_claim_json: claim json that match with claim in wallet.
@@ -356,8 +353,7 @@ def check_gotten_claim_is_valid(steps, gotten_claim, expected_claim_json,
     steps.add_step("Check lst_claims[0]['issuer_did']")
     err_msg = "Issuer's did mismatches"
     check(steps, error_message=err_msg,
-          condition=lambda: gotten_claim["schema_seq_no"] ==
-          schema_no)
+          condition=lambda: gotten_claim["schema_seq_no"] == schema_no)
 
 
 def create_proof_req(nonce: str, name: str, version: str,
@@ -365,7 +361,6 @@ def create_proof_req(nonce: str, name: str, version: str,
                      requested_predicates: dict=None) -> str:
     """
     Create a proof request.
-
     :param nonce: a number that unique within wallet.
     :param name: name of proof request (unique).
     :param version: version of proof request.
@@ -381,3 +376,37 @@ def create_proof_req(nonce: str, name: str, version: str,
     return json.dumps({"nonce": nonce, "name": name, "version": version,
                        "requested_attrs": requested_attrs,
                        "requested_predicates": requested_predicates})
+
+
+def get_version(program: str) -> str:
+    """
+    Return version of a program.
+    :param program: program's name.
+    :return: version.
+    """
+    import subprocess
+    cmd = "dpkg -l | grep '{}'".format(program)
+    process = subprocess.Popen([cmd], shell=True, stdout=subprocess.PIPE,
+                               stdin=subprocess.PIPE)
+    (out, _) = process.communicate()
+    result = out.decode()
+    version = result.split()
+
+    if len(version) >= 3:
+        if version[1] == program:
+            return version[2]
+    return "Cannot find version for '{}'".format(program)
+
+
+def create_folder(folder):
+    """
+    Create folder if it is not exist.
+    :param folder: folder need to create.
+    :return:
+    """
+    import errno
+    try:
+        os.makedirs(folder)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise e
