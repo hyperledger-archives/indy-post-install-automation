@@ -32,14 +32,14 @@ class TestCryptoBoxSealWithValidKey(CryptoTestBase):
                             "there is no exception raised")
         msg = "Test crypto".encode()
         encrypted_msg = await utils.perform(self.steps,
-                                            crypto.crypto_box_seal,
+                                            crypto.anon_crypt,
                                             my_verkey, msg,
                                             ignore_exception=False)
 
         # 5. Open sealed crypto box.
         self.steps.add_step("Open sealed crypto box")
         decrypted_msg = await utils.perform(self.steps,
-                                            crypto.crypto_box_seal_open,
+                                            crypto.anon_decrypt,
                                             self.wallet_handle,
                                             my_verkey, encrypted_msg)
 

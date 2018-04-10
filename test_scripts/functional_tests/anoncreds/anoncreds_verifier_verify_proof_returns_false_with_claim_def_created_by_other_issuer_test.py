@@ -7,7 +7,7 @@ if argument 'claim_defs_json' is incompatiple.
 """
 import json
 
-from indy import anoncreds, signus
+from indy import anoncreds, did
 import pytest
 
 from test_scripts.functional_tests.anoncreds.anoncreds_test_base \
@@ -47,11 +47,12 @@ class TestVerifierVerifyProofWithClaimDefCreatedByOtherIssuer\
         # 7. Create claim request.
         # 8. Create claim.
         # 9. Store claims into wallet.
-        claim_offer = utils.create_claim_offer(issuer_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer_did, prover_did)
+
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
-            json.dumps(claim_offer), gvt_claim_def, constant.secret_name,
+            claim_offer, gvt_claim_def, constant.secret_name,
             json.dumps(constant.gvt_claim), -1)
 
         # 10. Get stored claims with proof and
@@ -89,7 +90,7 @@ class TestVerifierVerifyProofWithClaimDefCreatedByOtherIssuer\
         # 12. Create 'issuer_did2'.
         self.steps.add_step("Create 'issuer_did2'")
         issuer_did2, _ = await  utils.perform(self.steps,
-                                              signus.create_and_store_my_did,
+                                              did.create_and_store_my_did,
                                               self.wallet_handle, '{}')
 
         # 13. Create and store other claim definition with 'issuer_did2'

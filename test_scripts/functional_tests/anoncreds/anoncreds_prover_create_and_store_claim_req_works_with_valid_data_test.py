@@ -44,11 +44,12 @@ class TestProverCreateClaimReq(AnoncredsTestBase):
 
         # 7. Create claim request.
         self.steps.add_step("Create claim request")
-        claim_offer = utils.create_claim_offer(issuer_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer_did, prover_did)
+
         claim_req = await utils.perform(
             self.steps, anoncreds.prover_create_and_store_claim_req,
-            self.wallet_handle, prover_did, json.dumps(claim_offer), claim_def,
+            self.wallet_handle, prover_did, claim_offer, claim_def,
             constant.secret_name)
 
         claim_req = json.loads(claim_req)
@@ -58,14 +59,14 @@ class TestProverCreateClaimReq(AnoncredsTestBase):
         err_msg = "claim_req['blinded_ms'] missing some fields"
         blinded_ms = claim_req["blinded_ms"]
         utils.check(self.steps, error_message=err_msg,
-                    condition=lambda: "prover_did" in blinded_ms and
+                    condition=lambda: "prover_did" in claim_req and
                                       "u" in blinded_ms and "ur" in blinded_ms)
 
         # 9. Check claim_req['blinded_ms']['prover_did'].
         self.steps.add_step("Check claim_req['blinded_ms']['prover_did']")
         err_msg = "Prover did in claim request mismatches"
         utils.check(self.steps, error_message=err_msg,
-                    condition=lambda: blinded_ms["prover_did"] == prover_did)
+                    condition=lambda: claim_req["prover_did"] == prover_did)
 
         # 10. Check claim_req['blinded_ms']['u'].
         self.steps.add_step("Check claim_req['blinded_ms']['u']")
@@ -89,5 +90,5 @@ class TestProverCreateClaimReq(AnoncredsTestBase):
         self.steps.add_step("Check claim_req['schema_seq_no']")
         err_msg = "Schema sequence number in claim request mismatches"
         utils.check(self.steps, error_message=err_msg,
-                    condition=lambda: claim_req["schema_seq_no"] ==
-                    constant.gvt_schema_seq)
+                    condition=lambda: claim_req["schema_key"] ==
+                    constant.gvt_schema_key)

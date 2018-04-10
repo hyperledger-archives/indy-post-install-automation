@@ -46,19 +46,19 @@ class TestProverGetClaimsWorksWithNoClaimMatchesWithFilter(AnoncredsTestBase):
         # 7. Create claim request.
         # 8. Create claim.
         # 9. Store claim into wallet.
-        claim_offer = utils.create_claim_offer(issuer_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer_did, prover_did)
+
         description = ["Create claim request", "Create claim",
                        "Store claim into wallet"]
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
-            json.dumps(claim_offer), claim_def, constant.secret_name,
+            claim_offer, claim_def, constant.secret_name,
             json.dumps(constant.gvt_claim), -1, step_descriptions=description)
 
         # 10. Get claims store in wallet.
         self.steps.add_step("Get claims store in wallet")
-        filter_json = json.dumps({"schema_seq_no":
-                                  constant.gvt_schema_seq + 1})
+        filter_json = json.dumps({"schema_key": constant.xyz_schema_key})
         lst_claims = await utils.perform(self.steps,
                                          anoncreds.prover_get_claims,
                                          self.wallet_handle, filter_json)

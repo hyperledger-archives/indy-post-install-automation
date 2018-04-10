@@ -34,5 +34,5 @@ class TestCryptoBoxWorks(CryptoTestBase):
         # 5. Create a crypto box".
         self.steps.add_step("Create a crypto box")
         msg = "Test crypto".encode("UTF-8")
-        await utils.perform(self.steps, crypto.crypto_box,
+        await utils.perform(self.steps, crypto.auth_crypt,
                             self.wallet_handle, first_key, second_key, msg)

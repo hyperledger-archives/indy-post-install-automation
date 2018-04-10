@@ -8,7 +8,7 @@ with valid data.
 
 import json
 
-from indy import anoncreds, signus
+from indy import anoncreds, did
 import pytest
 
 from test_scripts.functional_tests.anoncreds.anoncreds_test_base \
@@ -28,7 +28,7 @@ class TestIssuerCreateAndStoreClaimDefWithValidData(AnoncredsTestBase):
         # 3. Create 'issuer_did'.
         self.steps.add_step("Create 'issuer_did'")
         (issuer_did, _) = await utils.perform(self.steps,
-                                              signus.create_and_store_my_did,
+                                              did.create_and_store_my_did,
                                               self.wallet_handle, "{}")
 
         # 4. Create and store claim definition and store

@@ -7,7 +7,7 @@ Implementing test case SignRequest with valid value.
 """
 import json
 
-from indy import signus, ledger
+from indy import did, ledger
 import pytest
 
 from utilities import common, constant
@@ -45,15 +45,15 @@ class TestSignRequest(TestScenarioBase):
 
         # 2. Create and store did
         self.steps.add_step("Create DID")
-        (did, _) = \
-            await perform(self.steps, signus.create_and_store_my_did,
+        (_did, _) = \
+            await perform(self.steps, did.create_and_store_my_did,
                           self.wallet_handle,
                           json.dumps({"seed": constant.seed_default_trustee}))
 
         # 3. sign request
         self.steps.add_step("sign the request")
         sign_txn = await perform(self.steps, ledger.sign_request,
-                                 self.wallet_handle, did, message)
+                                 self.wallet_handle, _did, message)
 
         # 4. verify the signature is correct.
         self.steps.add_step("verify the signature is correct.")

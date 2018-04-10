@@ -7,7 +7,7 @@ Verify that user cannot create pairwise with unknown 'their_did'.
 """
 
 import pytest
-from indy import signus, pairwise
+from indy import did, pairwise
 from indy.error import ErrorCode
 from utilities import utils, common, constant
 from test_scripts.functional_tests.pairwise.pairwise_test_base \
@@ -25,7 +25,7 @@ class TestCreatePairwiseWithUnknownTheirDid(PairwiseTestBase):
         # 3. Create and store 'my_did' by random seed.
         self.steps.add_step("Create and store 'my_did' by random seed")
         (my_did, _) = await utils.perform(self.steps,
-                                          signus.create_and_store_my_did,
+                                          did.create_and_store_my_did,
                                           self.wallet_handle, "{}")
 
         # 4. Create pairwise with unknown 'their_did' and

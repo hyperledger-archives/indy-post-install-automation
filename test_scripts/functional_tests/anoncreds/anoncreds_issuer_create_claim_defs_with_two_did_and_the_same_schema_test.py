@@ -6,7 +6,7 @@ Implementing test case IssuerCreateClaimDefs with 2 DIDs and the same schema.
 '''
 import json
 
-from indy import anoncreds, signus
+from indy import anoncreds, did
 import pytest
 
 from test_scripts.functional_tests.anoncreds.anoncreds_test_base \
@@ -27,19 +27,19 @@ class TestIssuerCreateClaimDefsWith2DIDsAndTheSameSchema(AnoncredsTestBase):
         # 3. Create 'issuer2_did'.
         self.steps.add_step("Create 'issuer1_did'")
         (issuer1_did, _) = await utils.perform(self.steps,
-                                               signus.create_and_store_my_did,
+                                               did.create_and_store_my_did,
                                                self.wallet_handle, "{}")
 
         # 4. Create 'issuer2_did'.
         self.steps.add_step("Create 'issuer2_did'")
         (issuer2_did, _) = await utils.perform(self.steps,
-                                               signus.create_and_store_my_did,
+                                               did.create_and_store_my_did,
                                                self.wallet_handle, "{}")
 
         # 5. Create 'prover_did'.
         self.steps.add_step("Create 'prover_did'")
         (prover_did, _) = await utils.perform(self.steps,
-                                              signus.create_and_store_my_did,
+                                              did.create_and_store_my_did,
                                               self.wallet_handle, '{}')
 
         # 6. Create master secret.
@@ -67,14 +67,14 @@ class TestIssuerCreateClaimDefsWith2DIDsAndTheSameSchema(AnoncredsTestBase):
 
         # 9. Create claim1 request with issuer1.
         self.steps.add_step("Create claim request with issuer1")
-        claim_offer = utils.create_claim_offer(issuer1_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer1_did, prover_did)
         gvt_claim_req1 = json.loads(
                         await utils.perform(
                             self.steps,
                             anoncreds.prover_create_and_store_claim_req,
                             self.wallet_handle, prover_did,
-                            json.dumps(claim_offer), gvt_claim_def1,
+                            claim_offer, gvt_claim_def1,
                             constant.secret_name))
 
         # 10. Check gvt_claim_req1['issuer_did'].
@@ -84,39 +84,57 @@ class TestIssuerCreateClaimDefsWith2DIDsAndTheSameSchema(AnoncredsTestBase):
             self.steps, error_message=err_msg,
             condition=lambda: gvt_claim_req1['issuer_did'] == issuer1_did)
 
-        # 11. Check gvt_claim_req1['schema_seq_no'].
-        self.steps.add_step("gvt_claim_req1['schema_seq_no']")
-        err_msg = "gvt_claim_req1['schema_seq_no'] isn't equal" + \
-            str(constant.gvt_schema['seqNo'])
+        # 11 Check gvt_claim_req1['schema_key']['name'].
+        self.steps.add_step("gvt_claim_req1['schema_key']['name']")
+        err_msg = "gvt_claim_req1['schema_key']['name'] isn't equal" + \
+            str(constant.gvt_schema['data']['name'])
         utils.check(
             self.steps, error_message=err_msg,
-            condition=lambda: gvt_claim_req1['schema_seq_no'] ==
-            constant.gvt_schema['seqNo'])
+            condition=lambda: gvt_claim_req1['schema_key']['name'] ==
+            constant.gvt_schema['data']['name'])
 
-        # 12. Create claim request with issuer2.
+        # 12. Check gvt_claim_req1['schema_key']['did'].
+        self.steps.add_step("gvt_claim_req1['schema_key']['did']")
+        err_msg = "gvt_claim_req1['schema_key']['did'] isn't equal" + \
+                  str(constant.gvt_schema['dest'])
+        utils.check(
+            self.steps, error_message=err_msg,
+            condition=lambda: gvt_claim_req1['schema_key']['did'] ==
+                              constant.gvt_schema['dest'])
+
+        # 13. Create claim request with issuer2.
         self.steps.add_step("Create claim request with issuer2")
-        claim_offer = utils.create_claim_offer(issuer2_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer2_did, prover_did)
         gvt_claim_req2 = json.loads(
                         await utils.perform(
                             self.steps,
                             anoncreds.prover_create_and_store_claim_req,
                             self.wallet_handle, prover_did,
-                            json.dumps(claim_offer), gvt_claim_def2,
+                            claim_offer, gvt_claim_def2,
                             constant.secret_name))
 
-        # 13. Check gvt_claim_req2['issuer_did'].
+        # 14. Check gvt_claim_req2['issuer_did'].
         self.steps.add_step("gvt_claim_req2['issuer_did']")
         err_msg = "gvt_claim_req2['issuer_did'] isn't equal issuer2_did"
         utils.check(
             self.steps, error_message=err_msg,
             condition=lambda: gvt_claim_req2['issuer_did'] == issuer2_did)
 
-        # 14. Check gvt_claim_req2['schema_seq_no'].
-        self.steps.add_step("gvt_claim_req2['schema_seq_no']")
-        err_msg = "gvt_claim_req2['schema_seq_no'] isn't equal" + \
-            str(constant.gvt_schema['seqNo'])
+        # 15. Check gvt_claim_req2['schema_key']['name'].
+        self.steps.add_step("gvt_claim_req2['schema_key']['name']")
+        err_msg = "gvt_claim_req2['schema_key']['name'] isn't equal" + \
+                  str(constant.gvt_schema['data']['name'])
         utils.check(
             self.steps, error_message=err_msg,
-            condition=lambda: gvt_claim_req2['schema_seq_no'] ==
-            constant.gvt_schema['seqNo'])
+            condition=lambda: gvt_claim_req2['schema_key']['name'] ==
+                              constant.gvt_schema['data']['name'])
+
+        # 16. Check gvt_claim_req2['schema_key']['did'].
+        self.steps.add_step("gvt_claim_req2['schema_key']['did']")
+        err_msg = "gvt_claim_req2['schema_key']['did'] isn't equal" + \
+                  str(constant.gvt_schema['dest'])
+        utils.check(
+            self.steps, error_message=err_msg,
+            condition=lambda: gvt_claim_req2['schema_key']['did'] ==
+                              constant.gvt_schema['dest'])

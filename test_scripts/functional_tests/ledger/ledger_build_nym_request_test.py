@@ -7,7 +7,7 @@ Implementing test case BuildNymRequest with valid value.
 """
 import json
 
-from indy import signus, ledger
+from indy import did, ledger
 import pytest
 
 from utilities import common, constant
@@ -31,7 +31,7 @@ class TestBuildNymRequest(TestScenarioBase):
         self.steps.add_step("Create submitter")
         (submitter_did, _) = \
             await perform(self.steps,
-                          signus.create_and_store_my_did,
+                          did.create_and_store_my_did,
                           self.wallet_handle,
                           json.dumps({
                               "seed": constant.seed_default_trustee}))
@@ -41,7 +41,7 @@ class TestBuildNymRequest(TestScenarioBase):
         self.steps.add_step("Create target")
         (target_did, target_verkey) = await perform(
                                         self.steps,
-                                        signus.create_and_store_my_did,
+                                        did.create_and_store_my_did,
                                         self.wallet_handle,
                                         json.dumps({"seed": seed_trustee_2}))
 

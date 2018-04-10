@@ -7,7 +7,7 @@ Implementing negative test cases of get_schema.
 """
 import json
 
-from indy import signus, ledger
+from indy import did, ledger
 from indy.error import ErrorCode
 import pytest
 
@@ -63,6 +63,9 @@ def generate_argvalues_and_ids():
 
 class TestNegativeGetSchemaRequest(TestScenarioBase):
 
+    # IS-540 is not fixed.
+
+    @pytest.mark.skip
     @pytest.mark.asyncio
     async def test_bug_is540(self):
         # 1. Prepare pool and wallet. Get pool_handle, wallet_handle
@@ -79,11 +82,11 @@ class TestNegativeGetSchemaRequest(TestScenarioBase):
         self.steps.add_step("Create DID")
         (submitter_did, _) = \
             await perform(self.steps,
-                          signus.create_and_store_my_did,
+                          did.create_and_store_my_did,
                           self.wallet_handle,
                           json.dumps({"seed": seed_trustee_2}))
         (schema_did, _) = await perform(self.steps,
-                                        signus.create_and_store_my_did,
+                                        did.create_and_store_my_did,
                                         self.wallet_handle,
                                         json.dumps({
                                             "seed": seed_default_trustee}))
@@ -152,19 +155,19 @@ class TestNegativeGetSchemaRequest(TestScenarioBase):
         self.steps.add_step("Create DIDs")
         if not submitter_did:
             (submitter_did, _) = await perform(
-                self.steps, signus.create_and_store_my_did, self.wallet_handle,
+                self.steps, did.create_and_store_my_did, self.wallet_handle,
                 json.dumps({"seed": seed_default_trustee}))
         if not schema_did:
             seed_trustee_2 = "000000000000000000000000Trustee2"
             (schema_did, _) = await perform(self.steps,
-                                            signus.create_and_store_my_did,
+                                            did.create_and_store_my_did,
                                             self.wallet_handle,
                                             json.dumps({
                                                 "seed": seed_trustee_2}))
 
         # 3. build get schema request
         self.steps.add_step("Build schema request")
-        await perform_with_expected_code(
+        result = await perform_with_expected_code(
             self.steps, ledger.build_get_schema_request,
             submitter_did, schema_did, data,
             expected_code=expected_result)

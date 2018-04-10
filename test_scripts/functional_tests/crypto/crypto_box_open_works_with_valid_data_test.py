@@ -33,17 +33,16 @@ class TestOpenCryptoBox(CryptoTestBase):
 
         # 5. Create a crypto box".
         self.steps.add_step("Create a crypto box")
-        msg = "Test crypto".encode("UTF-8")
-        encrypted_msg, nonce = await utils.perform(
-                                                self.steps, crypto.crypto_box,
-                                                self.wallet_handle, first_key,
-                                                second_key, msg)
+        msg = "Test crypto".encode('UTF-8')
+        encrypted_msg = await utils.perform(self.steps, crypto.auth_crypt,
+                                            self.wallet_handle, first_key,
+                                            second_key, msg)
 
         # 6. Open crypto box.
         self.steps.add_step("Open a crypto box")
-        decrypted_msg = await utils.perform(self.steps, crypto.crypto_box_open,
-                                            self.wallet_handle, first_key,
-                                            second_key, encrypted_msg, nonce)
+        _, decrypted_msg = await utils.perform(self.steps, crypto.auth_decrypt,
+                                               self.wallet_handle, second_key,
+                                               encrypted_msg)
 
         # 7. Verify the message
         self.steps.add_step("Verify the message")

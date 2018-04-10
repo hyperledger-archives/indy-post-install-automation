@@ -8,7 +8,7 @@ wallet handle.
 
 import json
 
-from indy import anoncreds, signus
+from indy import anoncreds, did
 from indy.error import ErrorCode
 import pytest
 
@@ -30,7 +30,7 @@ class TestIssuerCreateAndStoreClaimDefWithInvalidWalletHandle\
         # 3. Create 'issuer_did'.
         self.steps.add_step("Create 'issuer_did'")
         (issuer_did, _) = await utils.perform(self.steps,
-                                              signus.create_and_store_my_did,
+                                              did.create_and_store_my_did,
                                               self.wallet_handle, "{}")
 
         # 4. Create and store claim definition with invalid wallet handle

@@ -45,14 +45,15 @@ class TestProverCreateProofWithValidData(AnoncredsTestBase):
         # 7. Create claim request and store result in 'claim_req'.
         # 8. Create claim and store result as 'created_claim'.
         # 9. Store 'created_claim' into wallet.
-        claim_offer = utils.create_claim_offer(issuer_did,
-                                               constant.gvt_schema_seq)
+
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer_did, prover_did)
         description = ["Create claim request and store result in 'claim_req'",
                        "Create claim and store result as 'created_claim'",
                        "Store 'created_claim' into wallet"]
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
-            json.dumps(claim_offer), claim_def, constant.secret_name,
+            claim_offer, claim_def, constant.secret_name,
             json.dumps(constant.gvt_claim), -1, step_descriptions=description)
 
         # 10. Get stored claims with proof request that
@@ -66,7 +67,7 @@ class TestProverCreateProofWithValidData(AnoncredsTestBase):
                                            requested_predicates={
                                                'predicate1_referent': {
                                                    'attr_name': 'age',
-                                                   'p_type': 'GE',
+                                                   'p_type': '>=',
                                                    'value': 25}})
         returned_claims = await utils.perform(
             self.steps, anoncreds.prover_get_claims_for_proof_req,
@@ -92,13 +93,13 @@ class TestProverCreateProofWithValidData(AnoncredsTestBase):
             constant.secret_name, claims_defs_json, '{}')
 
         created_proof = json.loads(created_proof)
-        temp_proofs = created_proof['proofs']
+        temp_proofs = created_proof['proof']['proofs']
         print(str(temp_proofs.keys()))
-        temp_ref = temp_proofs[referent]
-        temp_proof = temp_ref['proof']
+        temp_proof = temp_proofs[referent]
+        temp_identifier = created_proof['identifiers'][referent]
         temp_pri_proof = temp_proof['primary_proof']
         temp_eq_proof = temp_pri_proof['eq_proof']
-        temp_agg = created_proof['aggregated_proof']
+        temp_agg = created_proof['proof']['aggregated_proof']
         temp_req_proof = created_proof['requested_proof']
 
         # 12. Check created_proof['proofs'][referent]['proof']['primary_proof']
@@ -138,7 +139,7 @@ class TestProverCreateProofWithValidData(AnoncredsTestBase):
         err_msg = "created_proof['proofs'][referent]" \
                   "['issuer_did'] mismatches"
         utils.check(self.steps, error_message=err_msg,
-                    condition=lambda: temp_ref['issuer_did'] == issuer_did)
+                    condition=lambda: temp_identifier['issuer_did'] == issuer_did)
 
         # 16. Check created_proof['proofs'][referent]['schema_seq_no']
         self.steps.add_step("Check created_proof['proofs'][referent]"
@@ -146,8 +147,8 @@ class TestProverCreateProofWithValidData(AnoncredsTestBase):
         err_msg = "Check created_proof['proofs'][referent]" \
                   "['schema_seq_no'] mismatches"
         utils.check(self.steps, error_message=err_msg,
-                    condition=lambda: temp_ref['schema_seq_no'] ==
-                    constant.gvt_schema_seq)
+                    condition=lambda: temp_identifier['schema_key']['name'] ==
+                    constant.gvt_schema['data']['name'])
 
         # 17. Check created_proof['aggregated_proof']
         self.steps.add_step("Check created_proof"

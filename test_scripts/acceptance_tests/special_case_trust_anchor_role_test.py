@@ -11,7 +11,7 @@ Verify that user can use 'TrustAnchor' role to do some special cases.
 import pytest
 import json
 
-from indy import ledger, signus
+from indy import ledger, did
 
 from utilities import common
 from utilities.utils import generate_random_string, perform, \
@@ -47,49 +47,49 @@ class TestSpecialCaseTrustAnchorRole(TestScenarioBase):
         # 2. Create DIDs ----------------------------------------------------
         self.steps.add_step("Create DIDs")
         (default_trustee_did, _) = await perform(
-                                    self.steps, signus.create_and_store_my_did,
+                                    self.steps, did.create_and_store_my_did,
                                     self.wallet_handle,
                                     json.dumps({"seed": seed_default_trustee}))
 
         (trustee1_did, trustee1_verkey) = await perform(
                                           self.steps,
-                                          signus.create_and_store_my_did,
+                                          did.create_and_store_my_did,
                                           self.wallet_handle,
                                           json.dumps({"seed": seed_trustee1}))
 
         (trustee2_did, trustee2_verkey) = await perform(
                                           self.steps,
-                                          signus.create_and_store_my_did,
+                                          did.create_and_store_my_did,
                                           self.wallet_handle,
                                           json.dumps({"seed": seed_trustee2}))
 
         (steward1_did, steward1_verkey) = await perform(
                                           self.steps,
-                                          signus.create_and_store_my_did,
+                                          did.create_and_store_my_did,
                                           self.wallet_handle,
                                           json.dumps({"seed": seed_steward1}))
 
         (steward2_did, steward2_verkey) = await perform(
                                           self.steps,
-                                          signus.create_and_store_my_did,
+                                          did.create_and_store_my_did,
                                           self.wallet_handle,
                                           json.dumps({"seed": seed_steward2}))
 
         (trustanchor1_did, trustanchor1_verkey) = await perform(
                                     self.steps,
-                                    signus.create_and_store_my_did,
+                                    did.create_and_store_my_did,
                                     self.wallet_handle,
                                     json.dumps({"seed": seed_trustanchor1}))
 
         (trustanchor2_did, trustanchor2_verkey) = await perform(
                                     self.steps,
-                                    signus.create_and_store_my_did,
+                                    did.create_and_store_my_did,
                                     self.wallet_handle,
                                     json.dumps({"seed": seed_trustanchor2}))
 
         (trustanchor3_did, trustanchor3_verkey) = await perform(
                                     self.steps,
-                                    signus.create_and_store_my_did,
+                                    did.create_and_store_my_did,
                                     self.wallet_handle,
                                     json.dumps({"seed": seed_trustanchor3}))
 
@@ -128,7 +128,7 @@ class TestSpecialCaseTrustAnchorRole(TestScenarioBase):
         await perform_with_expected_code(
             self.steps, common.build_and_send_nym_request, self.pool_handle,
             self.wallet_handle, trustanchor1_did, trustee2_did,
-            trustee2_verkey, None, Role.TRUSTEE, expected_code=304)
+            trustee2_verkey, None, Role.TRUSTEE)
 
         # 8. Verify GET_NYM for new Trustee------------------------------------
         self.steps.add_step("Verify get NYM for new trustee")
@@ -143,7 +143,7 @@ class TestSpecialCaseTrustAnchorRole(TestScenarioBase):
         await perform_with_expected_code(
             self.steps, common.build_and_send_nym_request, self.pool_handle,
             self.wallet_handle, trustee2_did, steward1_did, steward1_verkey,
-            None, Role.STEWARD, expected_code=304)
+            None, Role.STEWARD)
 
         # 10. Using the TrustAnchor blacklist a Trustee (TrustAnchor should not
         # be able to blacklist Trustee)
@@ -151,7 +151,7 @@ class TestSpecialCaseTrustAnchorRole(TestScenarioBase):
         await perform_with_expected_code(
             self.steps, common.build_and_send_nym_request, self.pool_handle,
             self.wallet_handle, trustanchor1_did, trustee1_did,
-            trustee1_verkey, None, Role.NONE, expected_code=304)
+            trustee1_verkey, None, Role.NONE)
 
         # 11. Verify Trustee was not blacklisted by creating another Trustee---
         self.steps.add_step(
@@ -165,8 +165,7 @@ class TestSpecialCaseTrustAnchorRole(TestScenarioBase):
         await perform_with_expected_code(
                 self.steps, common.build_and_send_nym_request,
                 self.pool_handle, self.wallet_handle, trustanchor1_did,
-                steward2_did, steward2_verkey, None, Role.STEWARD,
-                expected_code=304)
+                steward2_did, steward2_verkey, None, Role.STEWARD)
 
         # 13. Using the Trustee1 create Steward1 ------------------------------
         self.steps.add_step("Using the Trustee1 create Steward1")
@@ -179,16 +178,14 @@ class TestSpecialCaseTrustAnchorRole(TestScenarioBase):
         await perform_with_expected_code(
                 self.steps, common.build_and_send_nym_request,
                 self.pool_handle, self.wallet_handle, trustanchor1_did,
-                steward1_did, steward1_verkey, None, Role.NONE,
-                expected_code=304)
+                steward1_did, steward1_verkey, None, Role.NONE)
 
         # 15. Verify that a TrustAnchor1 cannot create another TrustAnchor3 ---
         self.steps.add_step("Verify TrustAnchor1 cannot create a TrustAnchor3")
         await perform_with_expected_code(
                 self.steps, common.build_and_send_nym_request,
                 self.pool_handle, self.wallet_handle, trustanchor1_did,
-                trustanchor3_did, trustanchor3_verkey, None, Role.TRUST_ANCHOR,
-                expected_code=304)
+                trustanchor3_did, trustanchor3_verkey, None, Role.TRUST_ANCHOR)
 
         # 16. Using the Trustee1 create TrustAnchor2 --------------------------
         self.steps.add_step("Using the Trustee1 create Steward1")
@@ -203,5 +200,4 @@ class TestSpecialCaseTrustAnchorRole(TestScenarioBase):
         await perform_with_expected_code(
                 self.steps, common.build_and_send_nym_request,
                 self.pool_handle, self.wallet_handle, trustanchor1_did,
-                trustanchor2_did, trustanchor2_verkey, None, Role.NONE,
-                expected_code=304)
+                trustanchor2_did, trustanchor2_verkey, None, Role.NONE)

@@ -46,11 +46,12 @@ class TestProverGetClaimReturnCorrectFormat(AnoncredsTestBase):
         # 7. Create claim request.
         # 8. Create claim.
         # 9. Store claim into wallet.
-        claim_offer = utils.create_claim_offer(issuer_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer_did, prover_did)
+
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
-            json.dumps(claim_offer), claim_def, constant.secret_name,
+            claim_offer, claim_def, constant.secret_name,
             json.dumps(constant.gvt_claim), -1)
 
         # 10. Get claims store in wallet.
@@ -71,7 +72,7 @@ class TestProverGetClaimReturnCorrectFormat(AnoncredsTestBase):
         self.steps.add_step("Check lst_claims[0]")
         err_msg = "Length of lst_claim[0] is incorrect"
         utils.check(self.steps, error_message=err_msg,
-                    condition=lambda: len(lst_claims[0]) == 4)
+                    condition=lambda: len(lst_claims[0]) == 5)
 
         # 13. Check lst_claims[0]['claim_uuid'].
         # 14. Check lst_claims[0]['attrs'].

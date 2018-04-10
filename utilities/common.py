@@ -9,7 +9,7 @@ Containing all functions that is common among test scenarios.
 import json
 import os
 import shutil
-from indy import wallet, pool, ledger, anoncreds, signus
+from indy import wallet, pool, ledger, anoncreds, did
 from indy.error import IndyError
 from utilities import constant, utils, step
 
@@ -76,8 +76,9 @@ async def build_and_send_nym_request(pool_handle, wallet_handle,
     nym_txn_req = await \
         ledger.build_nym_request(submitter_did, target_did,
                                  target_verkey, alias, role)
-    await ledger.sign_and_submit_request(pool_handle, wallet_handle,
+    result = await ledger.sign_and_submit_request(pool_handle, wallet_handle,
                                          submitter_did, nym_txn_req)
+    return result
 
 
 async def create_and_open_pool(pool_name, pool_genesis_txn_file):
@@ -286,7 +287,7 @@ async def create_and_store_claim(steps: step.Steps, wallet_handle: int,
 
     :param steps: list steps of test case.
     :param wallet_handle: returned by 'wallet.open_wallet'.
-    :param prover_did: prover did, returned by 'signus.create_and_store_my_did'
+    :param prover_did: prover did, returned by 'did.create_and_store_my_did'
     :param claim_offer: a claim offer. Example: {"issuer_did": <did>,
                                                  "schema_seq_no": <schema_no>}
     :param claim_def: claim definition, returned by
@@ -332,7 +333,7 @@ async def create_and_store_claim(steps: step.Steps, wallet_handle: int,
             step_des = step_descriptions[2]
         steps.add_step(step_des)
         await utils.perform(steps, anoncreds.prover_store_claim,
-                            wallet_handle, created_claim,
+                            wallet_handle, created_claim, None,
                             ignore_exception=ignore_exception)
 
     return claim_req, revoc_update_json, created_claim
@@ -363,7 +364,7 @@ async def create_and_store_dids_and_verkeys(
                 step_descriptions[i]):
             description = step_descriptions[i]
         steps.add_step(description)
-        temp = await utils.perform(steps, signus.create_and_store_my_did,
+        temp = await utils.perform(steps, did.create_and_store_my_did,
                                    wallet_handle, did_json,
                                    ignore_exception=ignore_exception)
         result.append(temp)

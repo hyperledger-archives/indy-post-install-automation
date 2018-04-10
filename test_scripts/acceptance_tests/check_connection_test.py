@@ -11,7 +11,7 @@ Verify that user can connect to the pool ledger.
 import pytest
 import json
 
-from indy import signus, wallet, pool
+from indy import did, wallet, pool
 
 from utilities.constant import pool_genesis_txn_file
 from utilities.test_scenario_base import TestScenarioBase
@@ -39,7 +39,7 @@ class TestCheckConnection(TestScenarioBase):
 
         # 3. Create DID
         self.steps.add_step("Create DID")
-        await perform(self.steps, signus.create_and_store_my_did,
+        await perform(self.steps, did.create_and_store_my_did,
                       self.wallet_handle,
                       json.dumps({"seed": self.seed_steward01}))
 

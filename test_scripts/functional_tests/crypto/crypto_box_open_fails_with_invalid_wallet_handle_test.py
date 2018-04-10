@@ -35,15 +35,15 @@ class TestOpenCryptoBoxWithInvalidWalletHandle(CryptoTestBase):
         # 5. Create a crypto box".
         self.steps.add_step("Create a crypto box")
         msg = "Test crypto".encode("UTF-8")
-        encrypted_msg, nonce = await utils.perform(
-                                                self.steps, crypto.crypto_box,
+        encrypted_msg = await utils.perform(
+                                                self.steps, crypto.auth_crypt,
                                                 self.wallet_handle, first_key,
                                                 second_key, msg)
 
         # 6. Open a crypto box with invalid wallet handle. Expected error = 200
         self.steps.add_step("Open a crypto box with invalid wallet handle")
         await utils.perform_with_expected_code(
-                                         self.steps, crypto.crypto_box_open,
-                                         self.wallet_handle + 9999, first_key,
-                                         second_key, encrypted_msg,
-                                         nonce, expected_code=200)
+                                         self.steps, crypto.auth_decrypt,
+                                         self.wallet_handle + 9999, second_key,
+                                         encrypted_msg,
+                                         expected_code=200)

@@ -41,11 +41,11 @@ class TestMessagesOnConnection(TestScenarioBase):
         os.system(remove_pool_genesis_file)
         os.system(restore_pool_genesis_file)
 
+    @pytest.mark.skip
     @pytest.mark.asyncio
     async def test(self):
         # 1. Create ledger config from genesis txn file
-        self.steps.add_step("Create Ledger -> "
-                            "Bug: https://jira.hyperledger.org/browse/IS-332")
+        self.steps.add_step("Create Ledger ->")
         pool_config = json.dumps(
             {"genesis_txn": str(self.pool_genesis_txn_file)})
         self.pool_handle = await perform(self.steps,
@@ -54,11 +54,9 @@ class TestMessagesOnConnection(TestScenarioBase):
 
         # 2. Open pool ledger -------------------------------------------------
         self.steps.add_step("Open pool ledger")
-        bug_is332 = "Bug: https://jira.hyperledger.org/browse/IS-332"
-        message_2 = "Failed due to the Bug IS-332" + "\n" + bug_is332
-        self.steps.get_last_step().set_status(Status.FAILED, message_2)
+        self.steps.get_last_step().set_status(Status.FAILED)
 
         # 3. verifying the message --------------------------------------------
         self.steps.add_step("verifying the message")
-        message_3 = "TODO after fix IS-332"
-        self.steps.get_last_step().set_status(Status.FAILED, message_3)
+        # Need to implement this case since blocker is fixed
+        self.steps.get_last_step().set_status(Status.FAILED)

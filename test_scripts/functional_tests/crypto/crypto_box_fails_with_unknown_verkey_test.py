@@ -27,6 +27,6 @@ class TestCryptoBoxWithUnknownVerkey(CryptoTestBase):
         second_key = "UNKNOWN"
         msg = "Test crypto".encode("UTF-8")
         await utils.perform_with_expected_code(
-                                     self.steps, crypto.crypto_box,
+                                     self.steps, crypto.auth_crypt,
                                      self.wallet_handle, first_key, second_key,
                                      msg, expected_code=113)

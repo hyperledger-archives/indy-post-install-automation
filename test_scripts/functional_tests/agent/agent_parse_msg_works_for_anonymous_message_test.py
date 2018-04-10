@@ -5,7 +5,7 @@ Created on Dec 20, 2017
 Verify that user can parse an authenticated message.
 """
 
-from indy import agent, signus
+from indy import crypto, did
 import pytest
 
 from test_scripts.functional_tests.agent.agent_test_base import AgentTestBase
@@ -21,17 +21,17 @@ class TestAgentParseAnonymousMessage(AgentTestBase):
         self.wallet_handle = await common.create_and_open_wallet_for_steps(
             self.steps, self.wallet_name, self.pool_name)
 
-        # 3. Create "recipient_verkey" with "signus.created_and_store_my_did".
+        # 3. Create "recipient_verkey" with "did.created_and_store_my_did".
         self.steps.add_step(
-            "Create 'recipient_verkey' with 'signus.created_and_store_my_did'")
+            "Create 'recipient_verkey' with 'did.created_and_store_my_did'")
         (_, self.recipient_verkey) = await utils.perform(
-            self.steps, signus.create_and_store_my_did, self.wallet_handle,
+            self.steps, did.create_and_store_my_did, self.wallet_handle,
             "{}", ignore_exception=False)
 
         # 4. Prepare message.
         self.steps.add_step("Prepare encrypted message")
         self.encrypted_msg = await utils.perform(self.steps,
-                                                 agent.prep_anonymous_msg,
+                                                 crypto.anon_crypt,
                                                  self.recipient_verkey,
                                                  self.message,
                                                  ignore_exception=False)
@@ -39,4 +39,4 @@ class TestAgentParseAnonymousMessage(AgentTestBase):
         # 5. Parsed 'encrypted_message'.
         # 6. Check 'parsed_message'
         # 7. Check 'parsed_verkey'
-        await super()._parsed_and_check_encrypted_msg()
+        await super()._parsed_and_check_encrypted_msg_anon()

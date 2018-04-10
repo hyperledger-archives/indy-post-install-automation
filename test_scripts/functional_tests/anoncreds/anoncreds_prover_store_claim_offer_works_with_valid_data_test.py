@@ -7,7 +7,7 @@ Verify that a claim offer can be stored by anoncreds.prover_store_claim_offer
 
 import json
 
-from indy import anoncreds, signus
+from indy import anoncreds, did
 import pytest
 
 from test_scripts.functional_tests.anoncreds.anoncreds_test_base \
@@ -27,7 +27,13 @@ class TestProverStoreClaimOfferWithValidData(AnoncredsTestBase):
         # 3. Create 'issuer_did'.
         self.steps.add_step("Create 'issuer_did'")
         (issuer_did, _) = await utils.perform(self.steps,
-                                              signus.create_and_store_my_did,
+                                              did.create_and_store_my_did,
+                                              self.wallet_handle, "{}")
+
+        # 4. Create 'prover_did'.
+        self.steps.add_step("Create 'prover_did'")
+        (prover_did, _) = await utils.perform(self.steps,
+                                              did.create_and_store_my_did,
                                               self.wallet_handle, "{}")
 
         # 4. Create and store claim definition.
@@ -41,10 +47,11 @@ class TestProverStoreClaimOfferWithValidData(AnoncredsTestBase):
         # 5. Store claim offer and verify that there is no exception raise.
         self.steps.add_step("Store claim offer and verify that "
                             "there is no exception raise")
-        offer_json = utils.create_claim_offer(issuer_did,
-                                              constant.gvt_schema_seq)
+        offer_json = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                               issuer_did, prover_did)
+
         await utils.perform(self.steps, anoncreds.prover_store_claim_offer,
-                            self.wallet_handle, json.dumps(offer_json),
+                            self.wallet_handle, offer_json,
                             ignore_exception=False)
 
         # 6. Get claim offers and store returned value into 'list_claim_offer'.
@@ -59,4 +66,4 @@ class TestProverStoreClaimOfferWithValidData(AnoncredsTestBase):
         self.steps.add_step("Verify that 'offer_json' exists "
                             "in 'list_claim_offer'")
         utils.check(self.steps, error_message="Cannot store a claim offer",
-                    condition=lambda: offer_json in list_claim_offer)
+                    condition=lambda: constant.gvt_schema_key == list_claim_offer[0]['schema_key'])

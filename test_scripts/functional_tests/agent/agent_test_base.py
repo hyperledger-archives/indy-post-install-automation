@@ -6,7 +6,7 @@ Created on Dec 20, 2017
 Containing a base class for agent testing.
 """
 
-from indy import agent
+from indy import crypto
 from utilities import utils, common
 from utilities.test_scenario_base import TestScenarioBase
 
@@ -25,11 +25,11 @@ class AgentTestBase(TestScenarioBase):
         await common.close_and_delete_wallet(self.wallet_name,
                                              self.wallet_handle)
 
-    async def _parsed_and_check_encrypted_msg(self):
+    async def _parsed_and_check_encrypted_msg_auth(self):
         # Parse encrypted_message.
         self.steps.add_step("Parse encrypted message")
         parsed_verkey, parsed_msg = await utils.perform(self.steps,
-                                                        agent.parse_msg,
+                                                        crypto.auth_decrypt,
                                                         self.wallet_handle,
                                                         self.recipient_verkey,
                                                         self.encrypted_msg,
@@ -47,3 +47,20 @@ class AgentTestBase(TestScenarioBase):
                     error_message="'parsed_verkey' mismatches with "
                                   "'sender_verkey'",
                     condition=lambda: self.sender_verkey == parsed_verkey)
+
+    async def _parsed_and_check_encrypted_msg_anon(self):
+        # Parse encrypted_message.
+        self.steps.add_step("Parse encrypted message")
+        parsed_msg = await utils.perform(self.steps,
+                                         crypto.anon_decrypt,
+                                         self.wallet_handle,
+                                         self.recipient_verkey,
+                                         self.encrypted_msg,
+                                         ignore_exception=False)
+
+        # Verify "parsed_msg".
+        self.steps.add_step("Verify 'parsed_message'")
+        utils.check(self.steps,
+                    error_message="'parsed_message' mismatches with "
+                                  "original 'message'",
+                    condition=lambda: self.message == parsed_msg)

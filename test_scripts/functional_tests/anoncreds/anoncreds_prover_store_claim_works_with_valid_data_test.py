@@ -45,14 +45,15 @@ class TestProverStoreClaim(AnoncredsTestBase):
         # 8. Create claim.
         # 9. Store created claim into wallet and verify that
         # there is no exception raised.
-        claim_offer = utils.create_claim_offer(issuer_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer_did, prover_did)
+
         step_descriptions = ["", "",
                              "Store claim created into wallet and "
                              "verify that there is no exception raised"]
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
-            json.dumps(claim_offer), claim_def, constant.secret_name,
+            claim_offer, claim_def, constant.secret_name,
             json.dumps(constant.gvt_claim), -1, ignore_exception=False,
             step_descriptions=step_descriptions)
 

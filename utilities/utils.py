@@ -97,14 +97,14 @@ async def perform_with_expected_code(steps, func, *args, expected_code=0,
              contain "expected_code".
     """
     try:
-        await func(*args)
-        message = "Expected exception %s but not." % str(expected_code)
-        steps.get_last_step().set_status(Status.FAILED, message)
-
-        if not ignore_exception:
-            result = ValueError(message)
+        result = await func(*args)
+        if json.loads(result)['op'] == 'REJECT':
+            steps.get_last_step().set_status(Status.PASSED)
+        elif json.loads(result)['op'] == 'REQNACK':
+            steps.get_last_step().set_status(Status.PASSED)
         else:
-            result = None
+            message = "Expected exception %s but not." % str(expected_code)
+            steps.get_last_step().set_status(Status.FAILED, message)
 
     except IndyError as E:
         if E.error_code == expected_code:
@@ -114,6 +114,11 @@ async def perform_with_expected_code(steps, func, *args, expected_code=0,
             print_error(constant.INDY_ERROR.format(str(E)))
             steps.get_last_step().set_status(Status.FAILED, str(E))
             result = E
+
+    except KeyError:
+        steps.get_last_step().set_status(Status.PASSED)
+        result = True
+
     except Exception as Ex:
         print_error(constant.EXCEPTION.format(str(Ex)))
         steps.get_last_step().set_status(Status.FAILED, str(Ex))
@@ -274,7 +279,7 @@ def check(steps: Steps, error_message: str, condition) -> bool:
 def create_claim_offer(issuer_did: str = "", schema_seq: int = None) -> dict:
     """
     Return a claim offer.
-    :param issuer_did: create by signus.create_and_store_did.
+    :param issuer_did: create by did.create_and_store_did.
     :param schema_seq:
     :return: claim offer.
     """
@@ -325,7 +330,7 @@ def check_gotten_claim_is_valid(steps, gotten_claim, expected_claim_json,
     :param steps: steps of test case.
     :param gotten_claim: return by 'anoncreds.prover_get_claims'.
     :param expected_claim_json: claim json that match with claim in wallet.
-    :param issuer_did: return by 'signus.create_and_store_my_did'.
+    :param issuer_did: return by 'did.create_and_store_my_did'.
     :param schema_no: schema sequence number.
     :return: True or False.
     """
@@ -333,7 +338,7 @@ def check_gotten_claim_is_valid(steps, gotten_claim, expected_claim_json,
     steps.add_step("Check lst_claims[0]['{}']".format(constant.claim_uuid_key))
     err_msg = "Claim's uuid is empty"
     check(steps, error_message=err_msg,
-          condition=lambda: len(gotten_claim["claim_uuid"]) > 0)
+          condition=lambda: len(gotten_claim["referent"]) > 0)
 
     # Check lst_claims[0]['attrs'].
     steps.add_step("Check lst_claims[0]['attrs']")
@@ -353,7 +358,7 @@ def check_gotten_claim_is_valid(steps, gotten_claim, expected_claim_json,
     steps.add_step("Check lst_claims[0]['issuer_did']")
     err_msg = "Issuer's did mismatches"
     check(steps, error_message=err_msg,
-          condition=lambda: gotten_claim["schema_seq_no"] == schema_no)
+          condition=lambda: gotten_claim["schema_key"] == constant.gvt_schema_key)
 
 
 def create_proof_req(nonce: str, name: str, version: str,

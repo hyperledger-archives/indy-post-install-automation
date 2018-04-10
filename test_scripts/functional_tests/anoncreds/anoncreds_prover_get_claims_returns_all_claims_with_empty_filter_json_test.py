@@ -44,11 +44,12 @@ class TestProverGetAllClaimsWithEmptyFilterJson(AnoncredsTestBase):
 
         # 7. Create claim request.
         self.steps.add_step("Create claim request")
-        claim_offer = utils.create_claim_offer(issuer_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer_did, prover_did)
+
         claim_req = await utils.perform(
             self.steps, anoncreds.prover_create_and_store_claim_req,
-            self.wallet_handle, prover_did, json.dumps(claim_offer),
+            self.wallet_handle, prover_did, claim_offer,
             claim_def, constant.secret_name)
 
         # 8. Create claim.
@@ -66,9 +67,9 @@ class TestProverGetAllClaimsWithEmptyFilterJson(AnoncredsTestBase):
         # 10. Store claims into wallet.
         self.steps.add_step("Store claims into wallet")
         await utils.perform(self.steps, anoncreds.prover_store_claim,
-                            self.wallet_handle, created_claim1)
+                            self.wallet_handle, created_claim1, 0)
         await utils.perform(self.steps, anoncreds.prover_store_claim,
-                            self.wallet_handle, created_claim2)
+                            self.wallet_handle, created_claim2, 0)
 
         # 11. Get claims store in wallet.
         self.steps.add_step("Get claims store in wallet")

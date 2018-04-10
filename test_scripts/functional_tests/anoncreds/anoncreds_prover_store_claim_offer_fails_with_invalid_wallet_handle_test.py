@@ -8,7 +8,7 @@ by anoncreds.prover_store_claim_offer with invalid wallet handle.
 
 import json
 
-from indy import anoncreds, signus
+from indy import anoncreds, did
 from indy.error import ErrorCode
 import pytest
 
@@ -29,7 +29,13 @@ class TestProverStoreClaimOfferWithInvalidWalletHandle(AnoncredsTestBase):
         # 3. Create 'issuer_did'.
         self.steps.add_step("Create 'issuer_did'")
         (issuer_did, _) = await utils.perform(self.steps,
-                                              signus.create_and_store_my_did,
+                                              did.create_and_store_my_did,
+                                              self.wallet_handle, "{}")
+
+        # 4. Create 'prover-did'.
+        self.steps.add_step("Create 'prover_did'")
+        (prover_did, _) = await utils.perform(self.steps,
+                                              did.create_and_store_my_did,
                                               self.wallet_handle, "{}")
 
         # 4. Create and store claim definition.
@@ -44,10 +50,10 @@ class TestProverStoreClaimOfferWithInvalidWalletHandle(AnoncredsTestBase):
         # verify that claim offer cannot be stored.
         self.steps.add_step("Store claim offer with invalid json and "
                             "verify that claim offer cannot be stored")
-        offer_json = utils.create_claim_offer(issuer_did,
-                                              constant.gvt_schema_seq)
+        offer_json = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                               issuer_did, prover_did)
         error_code = ErrorCode.WalletInvalidHandle
         await utils.perform_with_expected_code(
             self.steps, anoncreds.prover_store_claim_offer,
-            self.wallet_handle + 1, json.dumps(offer_json),
+            self.wallet_handle + 1, offer_json,
             expected_code=error_code)

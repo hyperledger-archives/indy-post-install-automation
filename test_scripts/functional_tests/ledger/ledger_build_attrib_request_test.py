@@ -7,7 +7,7 @@ Implementing test case BuildAttribRequest with valid value.
 """
 import json
 
-from indy import signus, ledger
+from indy import did, ledger
 import pytest
 
 from utilities import common
@@ -30,7 +30,7 @@ class TestBuildAttribRequest(TestScenarioBase):
         # 2. Create and store did
         self.steps.add_step("Create DIDs")
         (submitter_did, _) = await perform(
-            self.steps, signus.create_and_store_my_did, self.wallet_handle,
+            self.steps, did.create_and_store_my_did, self.wallet_handle,
             json.dumps({"seed": seed_default_trustee}))
 
         # 3. build attrib request
