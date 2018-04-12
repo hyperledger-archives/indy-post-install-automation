@@ -12,7 +12,7 @@ import pytest
 import json
 import os.path
 
-from indy import signus
+from indy import did
 
 from utilities import common
 from utilities.constant import seed_default_trustee, work_dir
@@ -45,6 +45,6 @@ class TestKeyringsWallets(TestScenarioBase):
 
         # 3. create DID to check the new wallet work well.
         self.steps.add_step("Create DID to check the new wallet work well")
-        await perform(self.steps, signus.create_and_store_my_did,
+        await perform(self.steps, did.create_and_store_my_did,
                       self.wallet_handle,
                       json.dumps({"seed": seed_default_trustee}))

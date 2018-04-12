@@ -5,7 +5,7 @@ Created on Dec 20, 2017
 Verify that user can prepare a message that associates with a created verkey.
 """
 
-from indy import agent, signus
+from indy import crypto, did
 import pytest
 
 from test_scripts.functional_tests.agent.agent_test_base import AgentTestBase
@@ -24,19 +24,19 @@ class TestAgentPrepMessageWithCreatedVerkey(AgentTestBase):
         # 3. Create "sender_verkey".
         self.steps.add_step("Create 'sender_verkey'")
         self.sender_verkey = await utils.perform(self.steps,
-                                                 signus.create_key,
+                                                 did.create_key,
                                                  self.wallet_handle, "{}")
 
-        # 4. Create "recipient_verkey" with "signus.created_and_store_my_did".
+        # 4. Create "recipient_verkey" with "did.created_and_store_my_did".
         self.steps.add_step(
-            "Create 'recipient_verkey' with 'signus.created_and_store_my_did'")
+            "Create 'recipient_verkey' with 'did.created_and_store_my_did'")
         (_, self.recipient_verkey) = await utils.perform(
-            self.steps, signus.create_and_store_my_did, self.wallet_handle,
+            self.steps, did.create_and_store_my_did, self.wallet_handle,
             "{}", ignore_exception=False)
 
         # 5. Prepare message.
         self.steps.add_step("Prepare encrypted message")
-        self.encrypted_msg = await utils.perform(self.steps, agent.prep_msg,
+        self.encrypted_msg = await utils.perform(self.steps, crypto.auth_crypt,
                                                  self.wallet_handle,
                                                  self.sender_verkey,
                                                  self.recipient_verkey,
@@ -45,4 +45,4 @@ class TestAgentPrepMessageWithCreatedVerkey(AgentTestBase):
         # 6. Parsed 'encrypted_message'.
         # 7. Check 'parsed_message'
         # 8. Check 'parsed_verkey'
-        await super()._parsed_and_check_encrypted_msg()
+        await super()._parsed_and_check_encrypted_msg_auth()

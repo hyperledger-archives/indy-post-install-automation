@@ -7,7 +7,7 @@ Implementing test case GetAttribRequest with valid value.
 """
 import json
 
-from indy import signus, ledger
+from indy import did, ledger
 import pytest
 
 from utilities import common
@@ -32,7 +32,7 @@ class TestGetAttribRequest(TestScenarioBase):
         self.steps.add_step("Create DIDs")
         (submitter_did, _) = await perform(
                                     self.steps,
-                                    signus.create_and_store_my_did,
+                                    did.create_and_store_my_did,
                                     self.wallet_handle,
                                     json.dumps({"seed": seed_default_trustee}))
 
@@ -54,7 +54,7 @@ class TestGetAttribRequest(TestScenarioBase):
         raw_name = "endpoint"
         get_attrib_req = json.loads(await perform(
                                 self.steps, ledger.build_get_attrib_request,
-                                submitter_did, submitter_did, raw_name))
+                                submitter_did, submitter_did, raw_name, '', ''))
 
         # 6. Verify json get attrib request is correct.
         self.steps.add_step("Verify json get attrib request is correct.")

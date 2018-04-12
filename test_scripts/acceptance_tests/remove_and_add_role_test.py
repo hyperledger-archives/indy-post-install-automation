@@ -8,10 +8,11 @@ Containing test script of test scenario 09: remove and add role.
 Verify that user can remove and add role.
 """
 
+import time
 import pytest
 import json
 
-from indy import ledger, signus
+from indy import ledger, did
 
 from utilities import common
 from utilities import utils
@@ -45,60 +46,60 @@ class TestRemoveAndAddRole(TestScenarioBase):
 
         (default_trustee_did, _) = await utils.perform(
             self.steps,
-            signus.create_and_store_my_did,
+            did.create_and_store_my_did,
             self.wallet_handle,
             json.dumps({"seed": seed_default_trustee}))
 
         (trustee1_did, trustee1_verkey) = await utils.perform(
             self.steps,
-            signus.create_and_store_my_did,
+            did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         (trustee2_did, trustee2_verkey) = await utils.perform(
             self.steps,
-            signus.create_and_store_my_did,
+            did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         (steward1_did, steward1_verkey) = await utils.perform(
             self.steps,
-            signus.create_and_store_my_did,
+            did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         (steward2_did, steward2_verkey) = await utils.perform(
             self.steps,
-            signus.create_and_store_my_did,
+            did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         (steward3_did, steward3_verkey) = await utils.perform(
             self.steps,
-            signus.create_and_store_my_did,
+            did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         (trustanchor1_did, trustanchor1_verkey) = await utils.perform(
             self.steps,
-            signus.create_and_store_my_did,
+            did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         (trustanchor2_did, trustanchor2_verkey) = await utils.perform(
             self.steps,
-            signus.create_and_store_my_did,
+            did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         (trustanchor3_did, trustanchor3_verkey) = await utils.perform(
             self.steps,
-            signus.create_and_store_my_did,
+            did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         (user1_did, user1_verkey) = await utils.perform(
-            self.steps, signus.create_and_store_my_did,
+            self.steps, did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         (user3_did, user3_verkey) = await utils.perform(
-            self.steps, signus.create_and_store_my_did,
+            self.steps, did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         (user4_did, user4_verkey) = await utils.perform(
-            self.steps, signus.create_and_store_my_did,
+            self.steps, did.create_and_store_my_did,
             self.wallet_handle, json.dumps({}))
 
         # =====================================================================
@@ -210,22 +211,18 @@ class TestRemoveAndAddRole(TestScenarioBase):
         self.check(temp, successful_msg, message)
 
         # 20. Using default Trustee to remove new roles.
-        bug_is_430 = "Bug: https://jira.hyperledger.org/browse/IS-430"
         self.steps.add_step("Using default Trustee to remove new roles")
-        message_20 = ""
         (temp, message) = await self.remove_role_and_check(default_trustee_did,
                                                            trustee1_did,
                                                            trustee1_verkey,
                                                            None, "Trustee1")
         result = temp
-        message_20 += message
 
         (temp, message) = await self.remove_role_and_check(default_trustee_did,
                                                            steward1_did,
                                                            steward1_verkey,
                                                            None, "Steward1")
         result = result and temp
-        message_20 += message
 
         (temp, message) = await self.remove_role_and_check(default_trustee_did,
                                                            trustanchor1_did,
@@ -233,11 +230,8 @@ class TestRemoveAndAddRole(TestScenarioBase):
                                                            None,
                                                            "TrustAnchor1")
         result = result and temp
-        message_20 += message
 
         if not result:
-            self.steps.get_last_step().set_message(
-                "{}\n{}".format(message_20[1:], bug_is_430))
             self.steps.get_last_step().set_status(Status.FAILED)
         else:
             self.steps.get_last_step().set_status(Status.PASSED)
@@ -247,7 +241,7 @@ class TestRemoveAndAddRole(TestScenarioBase):
             "Verify that removed Trustee1 cannot create Trustee or Steward")
         (temp, message) = await self.add_nym(trustee1_did, trustee2_did,
                                              trustee2_verkey, None,
-                                             Role.TRUSTEE, error_code=304)
+                                             Role.TRUSTEE)
 
         error_msg = "\nRemoved Trustee can create Trustee  (should fail) "
         successful_msg = "::PASS::Validated that removed Trustee1 " \
@@ -257,15 +251,14 @@ class TestRemoveAndAddRole(TestScenarioBase):
 
         (temp, message) = await self.add_nym(trustee1_did, steward2_did,
                                              steward2_verkey, None,
-                                             Role.STEWARD, error_code=304)
+                                             Role.STEWARD)
 
         successful_msg = "::PASS::Validated that removed Trustee1 " \
                          "cannot create a Steward!\n"
         error_msg = "\nRemoved Trustee can create Steward (should fail) "
 
-        self.check(temp, successful_msg, "{}{}\n{}".format(error_msg[1:],
-                                                           message,
-                                                           bug_is_430))
+        self.check(temp, successful_msg, error_msg)
+
         result = result and temp
 
         if not result:
@@ -281,9 +274,8 @@ class TestRemoveAndAddRole(TestScenarioBase):
                          "cannot create a TrustAnchor!\n"
         (temp, message) = await self.add_nym(steward1_did, trustanchor2_did,
                                              trustanchor2_verkey, None,
-                                             Role.TRUST_ANCHOR, error_code=304,
+                                             Role.TRUST_ANCHOR,
                                              default_message=default_msg)
-        error_msg = "{}\n{}".format(message, bug_is_430)
         self.check(temp, successful_msg, error_msg)
 
         # 23. Using default Trustee to create Trustee1.
@@ -308,9 +300,9 @@ class TestRemoveAndAddRole(TestScenarioBase):
 
         (temp, message) = await self.add_nym(steward1_did, trustanchor1_did,
                                              trustanchor1_verkey, None,
-                                             Role.TRUST_ANCHOR, error_code=304,
+                                             Role.TRUST_ANCHOR,
                                              default_message=error_msg)
-        self.check(temp, successful_msg, message)
+        self.check(temp, successful_msg, error_msg)
 
         # 26. Verify that Steward cannot remove a Trustee.
         self.steps.add_step("Verify that Steward cannot remove a Trustee")
@@ -443,7 +435,7 @@ class TestRemoveAndAddRole(TestScenarioBase):
         """
         (temp, temp_msg) = await self.add_nym(submitter_did, target_did,
                                               target_verkey, alias, Role.NONE)
-
+        time.sleep(1)
         message = ""
         if not temp:
             message = "\nCannot remove {}'s role - {}".format(target_name,

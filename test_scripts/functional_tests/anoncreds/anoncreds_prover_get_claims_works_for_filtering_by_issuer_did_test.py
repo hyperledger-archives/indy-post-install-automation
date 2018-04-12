@@ -58,25 +58,27 @@ class TestProverGetClaimByFilteringWithIssuerDid(AnoncredsTestBase):
         # 9. Create claim request with 'issuer1_did'.
         # 10. Create claim.
         # 11. Store claim into wallet.
-        claim_offer = utils.create_claim_offer(issuer1_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer1_did, prover_did)
+
         descriptions = ["Create claim request with 'issuer1_did'",
                         "Create claim", "Store claim into wallet"]
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
-            json.dumps(claim_offer), gvt_claim_def, constant.secret_name,
+            claim_offer, gvt_claim_def, constant.secret_name,
             json.dumps(constant.gvt_claim), -1, step_descriptions=descriptions)
 
         # 12. Create other claim request with 'issuer2_did'.
         # 13. Create other claim.
         # 14. Store claim into wallet.
-        claim_offer = utils.create_claim_offer(issuer2_did,
-                                               constant.xyz_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.xyz_schema),
+                                                                issuer2_did, prover_did)
+
         descriptions = ["Create other claim request with 'issuer2_did'",
                         "Create other claim", "Store claim into wallet"]
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
-            json.dumps(claim_offer), xyz_claim_def, constant.secret_name,
+            claim_offer, xyz_claim_def, constant.secret_name,
             json.dumps(constant.xyz_claim), -1, step_descriptions=descriptions)
 
         # 15. Get stored claims by filtering with 'issuer1_did'.

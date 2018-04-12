@@ -9,7 +9,7 @@ pairwise exists or not with wallet handle.
 
 import pytest
 import json
-from indy import signus, pairwise
+from indy import did, pairwise
 from indy.error import ErrorCode
 from utilities import utils, common
 from test_scripts.functional_tests.pairwise.pairwise_test_base \
@@ -27,18 +27,18 @@ class TestCheckPairwiseExistWithInvalidWalletHandle(PairwiseTestBase):
         # 3. Create and store 'my_did' by random seed.
         self.steps.add_step("Create and store 'my_did' by random seed")
         (my_did, _) = await utils.perform(self.steps,
-                                          signus.create_and_store_my_did,
+                                          did.create_and_store_my_did,
                                           self.wallet_handle, "{}")
 
         # 4. Create and "their_did".
         self.steps.add_step("Create 'their_did'")
         (their_did, _) = await  utils.perform(
-            self.steps, signus.create_and_store_my_did, self.wallet_handle,
+            self.steps, did.create_and_store_my_did, self.wallet_handle,
             '{}')
 
         # 5. Store 'their_did'.
         self.steps.add_step("Store 'their_did")
-        await utils.perform(self.steps, signus.store_their_did,
+        await utils.perform(self.steps, did.store_their_did,
                             self.wallet_handle,
                             json.dumps({"did": their_did}))
 

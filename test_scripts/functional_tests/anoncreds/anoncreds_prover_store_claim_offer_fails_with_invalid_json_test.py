@@ -8,7 +8,7 @@ anoncreds.prover_store_claim_offer with invalid json.
 
 import json
 
-from indy import anoncreds, signus
+from indy import anoncreds, did
 from indy.error import ErrorCode
 import pytest
 
@@ -29,7 +29,12 @@ class TestProverStoreClaimOfferWithInvalidJson(AnoncredsTestBase):
         # 3. Create 'issuer_did'.
         self.steps.add_step("Create 'issuer_did'")
         (issuer_did, _) = await utils.perform(self.steps,
-                                              signus.create_and_store_my_did,
+                                              did.create_and_store_my_did,
+                                              self.wallet_handle, "{}")
+        # 4. Create 'prover_did'.
+        self.steps.add_step("Create 'prover_did'")
+        (prover_did, _) = await utils.perform(self.steps,
+                                              did.create_and_store_my_did,
                                               self.wallet_handle, "{}")
 
         # 4. Create and store claim definition.
@@ -44,8 +49,12 @@ class TestProverStoreClaimOfferWithInvalidJson(AnoncredsTestBase):
         # verify that claim offer cannot be stored.
         self.steps.add_step("Store claim offer with invalid json and "
                             "verify that claim offer cannot be stored")
-        offer_json = utils.create_claim_offer(issuer_did)
+        offer_json = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                               issuer_did, prover_did)
+
+        offer_json = json.dumps(json.loads(offer_json).pop('schema_key'))
+
         error_code = ErrorCode.CommonInvalidStructure
         await utils.perform_with_expected_code(
             self.steps, anoncreds.prover_store_claim_offer, self.wallet_handle,
-            json.dumps(offer_json), expected_code=error_code)
+            offer_json, expected_code=error_code)

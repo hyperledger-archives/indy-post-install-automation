@@ -7,7 +7,7 @@ Implementing test case GetClaimRequest with valid value.
 """
 import json
 
-from indy import signus, ledger
+from indy import did, ledger
 import pytest
 
 from utilities import common
@@ -32,7 +32,7 @@ class TestGetClaimRequest(TestScenarioBase):
         self.steps.add_step("Create DIDs")
         (submitter_did, _) = await perform(
                                     self.steps,
-                                    signus.create_and_store_my_did,
+                                    did.create_and_store_my_did,
                                     self.wallet_handle,
                                     json.dumps({"seed": seed_default_trustee}))
 
@@ -55,15 +55,15 @@ class TestGetClaimRequest(TestScenarioBase):
 
         # 5. build GET_CLAIM request
         self.steps.add_step("build get_claim request")
-        origin = "origin"
+        # origin = "origin"
         claim_req = json.loads(await perform(
                                 self.steps, ledger.build_get_claim_def_txn,
                                 submitter_did, ref,
-                                signature_type, origin))
+                                signature_type, submitter_did))
 
         # 6. Verify json get_claim request is correct.
         self.steps.add_step("Verify json get_claim request is correct.")
         get_claim_op = get_claim_response.format("108", ref,
-                                                 signature_type, origin)
+                                                 signature_type, submitter_did)
         expected_response = json_template(submitter_did, get_claim_op)
         verify_json(self.steps, expected_response, claim_req)

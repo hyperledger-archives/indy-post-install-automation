@@ -27,36 +27,54 @@ class TestProverGetClaimOffersForFilterByIssuerDid(AnoncredsTestBase):
         # 3. Create 'issuer_did1'.
         # 4. Create 'issuer_did2'.
         ((issuer_did1, _),
-         (issuer_did2, _)) = await common.create_and_store_dids_and_verkeys(
-            self.steps, self.wallet_handle, number=2,
-            step_descriptions=["Create 'issuer_did1'", "Create 'issuer_did2'"])
+         (issuer_did2, _),
+         (prover_did, _)) = await common.create_and_store_dids_and_verkeys(
+            self.steps, self.wallet_handle, number=3,
+            step_descriptions=["Create 'issuer_did1'", "Create 'issuer_did2'", "Create 'prover_did'"])
 
         # 5. Create and store claim definition.
-        self.steps.add_step("Create and store claim definition")
+        self.steps.add_step("Create and store 3 claim definitions")
         await utils.perform(self.steps,
                             anoncreds.issuer_create_and_store_claim_def,
                             self.wallet_handle, issuer_did1,
                             json.dumps(constant.gvt_schema),
                             constant.signature_type, False)
 
+        await utils.perform(self.steps,
+                            anoncreds.issuer_create_and_store_claim_def,
+                            self.wallet_handle, issuer_did1,
+                            json.dumps(constant.xyz_schema),
+                            constant.signature_type, False)
+
+        await utils.perform(self.steps,
+                            anoncreds.issuer_create_and_store_claim_def,
+                            self.wallet_handle, issuer_did2,
+                            json.dumps(constant.xyz_schema),
+                            constant.signature_type, False)
+
         # 6. Store claim offer for 'issuer_did1'.
         self.steps.add_step("Store claim offer for 'issuer_did1'")
-        offer_json1 = utils.create_claim_offer(issuer_did1,
-                                               constant.gvt_schema_seq)
+        offer_json1 = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer_did1, prover_did)
+
         await utils.perform(self.steps, anoncreds.prover_store_claim_offer,
-                            self.wallet_handle, json.dumps(offer_json1))
+                            self.wallet_handle, offer_json1)
 
         # 7. Store another claim offer for 'issuer_did1'.
         self.steps.add_step("Store another claim offer for 'issuer_did1'")
-        offer_json2 = utils.create_claim_offer(issuer_did1, 2)
+        offer_json2 = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.xyz_schema),
+                                                                issuer_did1, prover_did)
+
         await utils.perform(self.steps, anoncreds.prover_store_claim_offer,
-                            self.wallet_handle, json.dumps(offer_json2))
+                            self.wallet_handle, offer_json2)
 
         # 8. Store claim offer for 'issuer_did2'.
         self.steps.add_step("Store claim offer for 'issuer_did2'")
-        offer_json3 = utils.create_claim_offer(issuer_did2, 2)
+        offer_json3 = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.xyz_schema),
+                                                                issuer_did2, prover_did)
+
         await utils.perform(self.steps, anoncreds.prover_store_claim_offer,
-                            self.wallet_handle, json.dumps(offer_json3))
+                            self.wallet_handle, offer_json3)
 
         # 9. Get claim offers and store returned value into 'list_claim_offer'.
         self.steps.add_step("Get claim offers and store "
@@ -77,5 +95,5 @@ class TestProverGetClaimOffersForFilterByIssuerDid(AnoncredsTestBase):
         self.steps.add_step("Verify that 'offer_json1' and 'offer_json2' "
                             "exist in 'list_claim_offer'")
         utils.check(self.steps, error_message="Cannot get claim offer",
-                    condition=lambda: offer_json1 in list_claim_offer and
-                    offer_json2 in list_claim_offer)
+                    condition=lambda: constant.gvt_schema_key == list_claim_offer[0]['schema_key'] and
+                    constant.xyz_schema_key == list_claim_offer[1]['schema_key'])

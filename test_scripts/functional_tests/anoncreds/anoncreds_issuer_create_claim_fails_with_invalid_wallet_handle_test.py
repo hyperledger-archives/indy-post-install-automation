@@ -45,11 +45,12 @@ class TestIssuerCreateClaimWithInvalidWalletHandle(AnoncredsTestBase):
 
         # 7. Create claim request.
         self.steps.add_step("Create claim request")
-        claim_offer = utils.create_claim_offer(issuer_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle,
+                                                                json.dumps(constant.gvt_schema),
+                                                                issuer_did, prover_did)
         claim_req = await utils.perform(
             self.steps, anoncreds.prover_create_and_store_claim_req,
-            self.wallet_handle, prover_did, json.dumps(claim_offer), claim_def,
+            self.wallet_handle, prover_did, claim_offer, claim_def,
             constant.secret_name)
 
         # 8. Create claim with invalid wallet handle and verify that

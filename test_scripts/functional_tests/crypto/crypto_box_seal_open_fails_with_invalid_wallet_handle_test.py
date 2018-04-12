@@ -32,7 +32,7 @@ class TestCryptoBoxSealOpenWithInvalidWalletHandle(CryptoTestBase):
         self.steps.add_step("Create sealed crypto box")
         msg = "Test crypto".encode()
         encrypted_msg = await utils.perform(self.steps,
-                                            crypto.crypto_box_seal,
+                                            crypto.anon_crypt,
                                             my_verkey, msg)
 
         # 5. Open sealed crypto box with invalid wallet handle
@@ -42,7 +42,7 @@ class TestCryptoBoxSealOpenWithInvalidWalletHandle(CryptoTestBase):
                             "that sealed crypto box cannot be opened")
         error_code = ErrorCode.WalletInvalidHandle
         await utils.perform_with_expected_code(self.steps,
-                                               crypto.crypto_box_seal_open,
+                                               crypto.anon_decrypt,
                                                self.wallet_handle + 1,
                                                my_verkey, encrypted_msg,
                                                expected_code=error_code)

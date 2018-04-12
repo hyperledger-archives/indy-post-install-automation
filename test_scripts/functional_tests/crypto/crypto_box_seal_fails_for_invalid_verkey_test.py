@@ -24,6 +24,6 @@ class TestCryptoBoxSealWithInvalidKey(TestScenarioBase):
         invalid_key = "CnEDk___MnmiHXEV1WFgbV___eYnPqs___TdcZaNhFVW"
         error_code = ErrorCode.CommonInvalidStructure
         await utils.perform_with_expected_code(self.steps,
-                                               crypto.crypto_box_seal,
+                                               crypto.anon_crypt,
                                                invalid_key, msg,
                                                expected_code=error_code)

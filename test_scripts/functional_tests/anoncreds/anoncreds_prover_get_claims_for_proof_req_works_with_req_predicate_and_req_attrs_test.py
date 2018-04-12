@@ -8,7 +8,7 @@ request attributes.
 """
 import json
 
-from indy import anoncreds, signus
+from indy import anoncreds, did
 import pytest
 
 from test_scripts.functional_tests.anoncreds.anoncreds_test_base \
@@ -29,13 +29,13 @@ class TestProverGetsClaimWithReqPredicateAndReqAttrs(AnoncredsTestBase):
         # 3. Create 'issuer_did'.
         self.steps.add_step("Create 'issuer_did'")
         (issuer_did, _) = await utils.perform(self.steps,
-                                              signus.create_and_store_my_did,
+                                              did.create_and_store_my_did,
                                               self.wallet_handle, "{}")
 
         # 4. Create 'prover_did'.
         self.steps.add_step("Create 'prover_did'")
         (prover_did, _) = await utils.perform(self.steps,
-                                              signus.create_and_store_my_did,
+                                              did.create_and_store_my_did,
                                               self.wallet_handle, '{}')
 
         # 5. Create master secret.
@@ -54,13 +54,14 @@ class TestProverGetsClaimWithReqPredicateAndReqAttrs(AnoncredsTestBase):
 
         # 7. Create claim request.
         self.steps.add_step("Create claim request")
-        claim_offer = utils.create_claim_offer(issuer_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer_did, prover_did)
+
         claim_req = await \
             utils.perform(self.steps,
                           anoncreds.prover_create_and_store_claim_req,
                           self.wallet_handle, prover_did,
-                          json.dumps(claim_offer), claim_def,
+                          claim_offer, claim_def,
                           constant.secret_name)
 
         # 8. Create claim.
@@ -73,7 +74,7 @@ class TestProverGetsClaimWithReqPredicateAndReqAttrs(AnoncredsTestBase):
         # 9. Store claims into wallet.
         self.steps.add_step("Store claims into wallet")
         await utils.perform(self.steps, anoncreds.prover_store_claim,
-                            self.wallet_handle, created_claim)
+                            self.wallet_handle, created_claim, 0)
 
         # 10. Get stored claims with proof request that
         # contains empty requested attrs and
@@ -83,7 +84,7 @@ class TestProverGetsClaimWithReqPredicateAndReqAttrs(AnoncredsTestBase):
             "empty requested attrs and store result into 'returned_claims'")
         attrs_req = {"attr1_referent": {"name": "name"}}
         predicates_js = {"predicate1_referent":
-                         {"attr_name": "age", "p_type": "GE", "value": 25}}
+                         {"attr_name": "age", "p_type": ">=", "value": 25}}
         proof_req = utils.create_proof_req("1", "proof_req_1", "1.0",
                                            attrs_req, predicates_js)
         returned_claims = json.loads(await utils.perform(

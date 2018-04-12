@@ -14,6 +14,7 @@ from enum import Enum
 user_home = os.path.expanduser('~') + os.sep
 work_dir = user_home + ".indy_client"
 seed_default_trustee = "000000000000000000000000Trustee1"
+did_default_trustee = "V4SGRU86Z58d6TV7PBUe6f"
 seed_default_steward = "000000000000000000000000Steward1"
 endpoint = "127.0.0.0:9700"
 decoded_verkey_length = 32
@@ -34,12 +35,15 @@ verkey_my2 = "kqa2HyagzfMAq42H5f9u3UMwnSBPQx2QfrSyXbUPxMn"
 gvt_schema_seq = 1
 gvt_schema = {
     "seqNo": gvt_schema_seq,
+    "dest": did_default_trustee,
     "data": {
         "name": "gvt",
         "version": "1.0",
         "attr_names": ["age", "sex", "height", "name"],
     }
 }
+
+gvt_schema_key = {'version': '1.0', 'name': 'gvt', 'did': 'V4SGRU86Z58d6TV7PBUe6f'}
 
 gvt_claim = {
     "sex": ["male", str(int(hashlib.md5("male".encode()).
@@ -64,12 +68,15 @@ gvt_other_claim = {
 xyz_schema_seq = 2
 xyz_schema = {
     "seqNo": xyz_schema_seq,
+    "dest": did_default_trustee,
     "data": {
         "name": "xyz",
         "version": "1.0",
         "attr_names": ["period", "status"]
     }
 }
+
+xyz_schema_key = {'version': '1.0', 'name': 'xyz', 'did': 'V4SGRU86Z58d6TV7PBUe6f'}
 
 xyz_claim = {
     "status": ["partial", str(int(hashlib.md5("partial".encode()).
@@ -79,19 +86,19 @@ xyz_claim = {
 
 signature_type = "CL"
 secret_name = "Master secret"
-claim_uuid_key = "claim_uuid"   # Change to "referent" in next build
+claim_uuid_key = "referent"   # Change to "referent" in next build
 
 # The path to the genesis transaction file is configurable.
 # The default directory is "/var/lib/indy/sandbox/".
-genesis_transaction_file_path = "/var/lib/indy/sandbox/"
+genesis_transaction_file_path = "/home/alexander/indy-post-install-automation/"
 pool_genesis_txn_file = \
-    genesis_transaction_file_path + "pool_transactions_sandbox_genesis"
+    genesis_transaction_file_path + "pool_transactions_genesis"
 domain_transactions_sandbox_genesis = \
-    genesis_transaction_file_path + "domain_transactions_sandbox_genesis"
+    genesis_transaction_file_path + "domain_transactions_genesis"
 
 original_pool_genesis_txn_file = \
     genesis_transaction_file_path \
-    + "original_pool_transactions_sandbox_genesis"
+    + "original_pool_transactions_genesis"
 
 ERR_PATH_DOES_NOT_EXIST = "Cannot find the path specified! \"{}\""
 ERR_CANNOT_FIND_ANY_TEST_SCENARIOS = "Cannot find any test scenarios!"

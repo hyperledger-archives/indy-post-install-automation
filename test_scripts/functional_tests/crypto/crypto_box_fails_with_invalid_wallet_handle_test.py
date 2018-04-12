@@ -35,7 +35,7 @@ class TestCryptoBoxWithInvalidHandle(CryptoTestBase):
         self.steps.add_step("Create a crypto box with Expected error = 200")
         msg = "Test crypto".encode("UTF-8")
         await utils.perform_with_expected_code(
-                                     self.steps, crypto.crypto_box,
+                                     self.steps, crypto.auth_crypt,
                                      self.wallet_handle + 9999,
                                      first_key, second_key, msg,
                                      expected_code=200)

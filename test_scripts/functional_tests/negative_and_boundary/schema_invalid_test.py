@@ -10,7 +10,7 @@ schema is invalid.
 import pytest
 import json
 import copy
-from indy import signus, ledger
+from indy import did, ledger
 from indy.error import ErrorCode
 from utilities.test_scenario_base import TestScenarioBase
 from utilities import common, utils, constant
@@ -37,34 +37,34 @@ def generate_invalid_transaction_schemas():
     data.append({'data': schema()})
     temp = data[-1]
     temp['data']['name'] = utils.generate_random_string(size=257)
-    temp['err'] = ErrorCode.LedgerInvalidTransaction
+    temp['err'] = ErrorCode.CommonInvalidStructure
 
     ids.append("schema_submit_schema_req_fails"
                "_with_schema_name_is_empty_string")
     data.append({'data': schema()})
     temp = data[-1]
     temp['data']['name'] = ""
-    temp['err'] = ErrorCode.LedgerInvalidTransaction
+    temp['err'] = ErrorCode.CommonInvalidStructure
 
     ids.append("schema_submit_schema_req_fails_"
                "with_schema_version_is_empty_string")
     data.append({'data': schema()})
     temp = data[-1]
     temp['data']['version'] = ""
-    temp['err'] = ErrorCode.LedgerInvalidTransaction
+    temp['err'] = ErrorCode.CommonInvalidStructure
 
     ids.append("schema_submit_schema_req_fails_with_"
                "schema_version_not_contain_only_digit")
     data.append({'data': schema()})
     temp = data[-1]
     temp['data']['version'] = "v1.0.1"
-    temp['err'] = ErrorCode.LedgerInvalidTransaction
+    temp['err'] = ErrorCode.CommonInvalidStructure
 
     ids.append("schema_submit_schema_req_fails_with_schema_version_too_long")
     data.append({'data': schema()})
     temp = data[-1]
     temp['data']['version'] = utils.generate_random_string(size=129)
-    temp['err'] = ErrorCode.LedgerInvalidTransaction
+    temp['err'] = ErrorCode.CommonInvalidStructure
 
     return data, ids
 
@@ -142,7 +142,7 @@ class TestInvalidSchema(TestScenarioBase):
         self.steps.add_step("Create and store did of "
                             "default trustee as 'did_default_trustee'")
         did_default_trustee, _ = await utils.perform(
-            self.steps, signus.create_and_store_my_did, self.wallet_handle,
+            self.steps, did.create_and_store_my_did, self.wallet_handle,
             json.dumps({'seed': constant.seed_default_trustee}))
 
         # 6. Build schema request and verify
@@ -178,7 +178,7 @@ class TestInvalidSchema(TestScenarioBase):
         self.steps.add_step("Create and store did of "
                             "default trustee as 'did_default_trustee'")
         did_default_trustee, _ = await utils.perform(
-            self.steps, signus.create_and_store_my_did, self.wallet_handle,
+            self.steps, did.create_and_store_my_did, self.wallet_handle,
             json.dumps({'seed': constant.seed_default_trustee}))
 
         # 6. Build schema request and store result as 'schema_req'.

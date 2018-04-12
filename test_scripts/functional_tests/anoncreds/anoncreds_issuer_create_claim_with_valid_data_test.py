@@ -44,13 +44,14 @@ class TestIssuerCreateClaim(AnoncredsTestBase):
 
         # 7. Create claim request.
         self.steps.add_step("Create claim request")
-        claim_offer = utils.create_claim_offer(issuer_did,
-                                               constant.gvt_schema_seq)
+        claim_offer = await anoncreds.issuer_create_claim_offer(self.wallet_handle, json.dumps(constant.gvt_schema),
+                                                                issuer_did, prover_did)
+
         claim_req = await \
             utils.perform(self.steps,
                           anoncreds.prover_create_and_store_claim_req,
                           self.wallet_handle, prover_did,
-                          json.dumps(claim_offer), claim_def,
+                          claim_offer, claim_def,
                           constant.secret_name)
 
         # 8. Create claim.
@@ -72,12 +73,11 @@ class TestIssuerCreateClaim(AnoncredsTestBase):
         self.steps.add_step("Check created_claim['schema_seq_no']")
         error_msg = "'schema_seq_no' mismatches"
         utils.check(self.steps, error_msg,
-                    condition=lambda:
-                    created_claim['schema_seq_no'] == constant.gvt_schema_seq)
+                    condition=lambda: utils.compare_json(created_claim['schema_key'], constant.gvt_schema_key))
 
         # 11. Check created_claim['claim'].
         self.steps.add_step("Check created_claim['claim']")
         error_msg = "'claim' mismatches"
         utils.check(self.steps, error_msg,
                     condition=lambda:
-                    created_claim['claim'] == constant.gvt_claim)
+                    created_claim['values'] == constant.gvt_claim)

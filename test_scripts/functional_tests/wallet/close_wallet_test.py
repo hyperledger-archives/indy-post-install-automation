@@ -5,7 +5,7 @@ Created on Dec 8, 2017
 
 Implementing test case CloseWallet with valid value.
 """
-from indy import wallet, signus
+from indy import wallet, did
 from indy.error import ErrorCode
 import pytest
 
@@ -45,6 +45,6 @@ class TestCloseWallet(TestScenarioBase):
         self.steps.add_step("Verify close wallet successfully by "
                             "creating and storing did in that wallet.")
         assert await perform_with_expected_code(
-            self.steps, signus.create_and_store_my_did,
+            self.steps, did.create_and_store_my_did,
             self.wallet_handle, "{}",
             expected_code=ErrorCode.WalletInvalidHandle)

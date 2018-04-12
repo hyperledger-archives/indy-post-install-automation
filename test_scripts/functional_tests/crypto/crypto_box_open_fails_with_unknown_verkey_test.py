@@ -35,8 +35,8 @@ class TestOpenCryptoBoxWithUnknownVerkey(CryptoTestBase):
         # 5. Create a crypto box".
         self.steps.add_step("Create a crypto box")
         msg = "Test crypto".encode("UTF-8")
-        encrypted_msg, nonce = await utils.perform(
-                                                self.steps, crypto.crypto_box,
+        encrypted_msg = await utils.perform(
+                                                self.steps, crypto.auth_crypt,
                                                 self.wallet_handle, first_key,
                                                 second_key, msg)
 
@@ -44,7 +44,7 @@ class TestOpenCryptoBoxWithUnknownVerkey(CryptoTestBase):
         self.steps.add_step("Open a crypto box")
         unknown_verkey = "UNKNOWN_VERKEY"
         await utils.perform_with_expected_code(
-                                         self.steps, crypto.crypto_box_open,
+                                         self.steps, crypto.auth_decrypt,
                                          self.wallet_handle, unknown_verkey,
-                                         second_key, encrypted_msg, nonce,
+                                         encrypted_msg,
                                          expected_code=113)

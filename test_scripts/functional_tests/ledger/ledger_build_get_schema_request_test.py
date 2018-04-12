@@ -7,7 +7,7 @@ Implementing test case GetSchemaRequest with valid value.
 """
 import json
 
-from indy import signus, ledger
+from indy import did, ledger
 import pytest
 
 from utilities import common
@@ -34,12 +34,12 @@ class TestGetSchemaRequest(TestScenarioBase):
         self.steps.add_step("Create DID")
         (submitter_did, _) = \
             await perform(self.steps,
-                          signus.create_and_store_my_did,
+                          did.create_and_store_my_did,
                           self.wallet_handle,
                           json.dumps({
                               "seed": seed_default_trustee}))
         (target_did, _) = await perform(self.steps,
-                                        signus.create_and_store_my_did,
+                                        did.create_and_store_my_did,
                                         self.wallet_handle,
                                         json.dumps({"seed": seed_trustee_2}))
 

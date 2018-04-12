@@ -37,7 +37,7 @@ class TestCryptoBoxSealOpenWithOtherKey(CryptoTestBase):
         self.steps.add_step("Create sealed crypto box with 'my_verkey'")
         msg = "Test crypto".encode()
         encrypted_msg = await utils.perform(self.steps,
-                                            crypto.crypto_box_seal,
+                                            crypto.anon_crypt,
                                             my_verkey, msg)
 
         # 5. Open sealed crypto box with other verkey and verify
@@ -46,7 +46,7 @@ class TestCryptoBoxSealOpenWithOtherKey(CryptoTestBase):
                             "verify that sealed crypto box cannot be opened")
         error_code = ErrorCode.CommonInvalidStructure
         await utils.perform_with_expected_code(self.steps,
-                                               crypto.crypto_box_seal_open,
+                                               crypto.anon_decrypt,
                                                self.wallet_handle,
                                                other_verkey, encrypted_msg,
                                                expected_code=error_code)

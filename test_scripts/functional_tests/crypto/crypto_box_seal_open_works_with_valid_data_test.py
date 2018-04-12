@@ -30,13 +30,13 @@ class TestCryptoBoxSealOpenWithValidKey(CryptoTestBase):
         self.steps.add_step("Create sealed crypto box")
         msg = "Test crypto".encode()
         encrypted_msg = await utils.perform(self.steps,
-                                            crypto.crypto_box_seal,
+                                            crypto.anon_crypt,
                                             my_verkey, msg)
 
         # 5. Open sealed crypto box.
         self.steps.add_step("Open sealed crypto box")
         decrypted_msg = await utils.perform(self.steps,
-                                            crypto.crypto_box_seal_open,
+                                            crypto.anon_decrypt,
                                             self.wallet_handle,
                                             my_verkey, encrypted_msg)
 
