@@ -19,6 +19,8 @@ from utilities import utils, constant, common
 class TestProverGetClaimOffersForFilterBySchemaSeqAndIssuerDid\
             (AnoncredsTestBase):
 
+    @pytest.mark.skip
+    # Method under test is deleted.s
     @pytest.mark.asyncio
     async def test(self):
         # 1. Create wallet.

@@ -14,7 +14,7 @@ from indy.error import IndyError
 from utilities import constant, utils, step
 
 
-async def prepare_pool_and_wallet(pool_name, wallet_name,
+async def prepare_pool_and_wallet(pool_name, wallet_name, wallet_credentials,
                                   pool_genesis_txn_file):
     """
     Prepare pool and wallet to use in a test case.
@@ -28,13 +28,13 @@ async def prepare_pool_and_wallet(pool_name, wallet_name,
         create_and_open_pool(pool_name, pool_genesis_txn_file)
 
     wallet_handle = await \
-        create_and_open_wallet(pool_name, wallet_name)
+        create_and_open_wallet(pool_name, wallet_name, wallet_credentials)
 
     return pool_handle, wallet_handle
 
 
 async def clean_up_pool_and_wallet(pool_name, pool_handle,
-                                   wallet_name, wallet_handle):
+                                   wallet_name, wallet_handle, wallet_credentials):
     """
     Clean up pool and wallet. Using as a post condition of a test case.
 
@@ -43,7 +43,7 @@ async def clean_up_pool_and_wallet(pool_name, pool_handle,
     :param wallet_name: The name of the wallet.
     :param wallet_handle: The handle of the wallet.
     """
-    await close_and_delete_wallet(wallet_name, wallet_handle)
+    await close_and_delete_wallet(wallet_name, wallet_handle, wallet_credentials)
     await close_and_delete_pool(pool_name, pool_handle)
 
 
@@ -101,7 +101,7 @@ async def create_and_open_pool(pool_name, pool_genesis_txn_file):
     return pool_handle
 
 
-async def create_and_open_wallet(pool_name, wallet_name):
+async def create_and_open_wallet(pool_name, wallet_name, wallet_credentials):
     """
     Creates a new secure wallet with the given unique name.
     Then open that wallet and get the wallet handle that can
@@ -112,10 +112,10 @@ async def create_and_open_wallet(pool_name, wallet_name):
     :return: The wallet handle was created.
     """
     utils.print_header("\nCreate wallet\n")
-    await wallet.create_wallet(pool_name, wallet_name, None, None, None)
+    await wallet.create_wallet(pool_name, wallet_name, None, None, wallet_credentials)
 
     utils.print_header("\nGet wallet handle\n")
-    wallet_handle = await wallet.open_wallet(wallet_name, None, None)
+    wallet_handle = await wallet.open_wallet(wallet_name, None, wallet_credentials)
     return wallet_handle
 
 
@@ -214,8 +214,7 @@ async def close_and_delete_pool(pool_name, pool_handle):
             utils.print_error(str(ie))
 
 
-async def close_and_delete_wallet(wallet_name, wallet_handle,
-                                  credentials=None):
+async def close_and_delete_wallet(wallet_name, wallet_handle, wallet_credentials):
     """
     Close and delete wallet by using libindy.
 
@@ -233,7 +232,7 @@ async def close_and_delete_wallet(wallet_name, wallet_handle,
     if wallet_name:
         try:
             utils.print_header("\nDelete wallet\n")
-            await wallet.delete_wallet(wallet_name, credentials)
+            await wallet.delete_wallet(wallet_name, wallet_credentials)
         except IndyError as ie:
             utils.print_error(str(ie))
 
@@ -275,9 +274,8 @@ def delete_wallet_folder(wallet_name: str):
 
 
 async def create_and_store_claim(steps: step.Steps, wallet_handle: int,
-                                 prover_did: str, claim_offer: str,
-                                 claim_def: str, secret_name: str,
-                                 claim_json: str, user_index_revoc: int,
+                                 prover_did: str, cred_offer: str,
+                                 cred_def_json: str, secret_name: str,
                                  store_in_wallet: bool=True,
                                  step_descriptions: list=None,
                                  ignore_exception: bool=False) -> \
@@ -308,9 +306,9 @@ async def create_and_store_claim(steps: step.Steps, wallet_handle: int,
     if step_descriptions and step_descriptions[0]:
         step_des = step_descriptions[0]
     steps.add_step(step_des)
-    claim_req = await utils.perform(
-        steps, anoncreds.prover_create_and_store_claim_req, wallet_handle,
-        prover_did, claim_offer, claim_def, secret_name,
+    cred_req, cred_req_meta = await utils.perform(
+        steps, anoncreds.prover_create_credential_req, wallet_handle,
+        prover_did, cred_offer, cred_def_json, secret_name,
         ignore_exception=ignore_exception)
 
     # Create claim.
@@ -319,10 +317,10 @@ async def create_and_store_claim(steps: step.Steps, wallet_handle: int,
             and step_descriptions[1]:
         step_des = step_descriptions[1]
     steps.add_step(step_des)
-    revoc_update_json, created_claim = await \
-        utils.perform(steps, anoncreds.issuer_create_claim,
-                      wallet_handle, claim_req, claim_json,
-                      user_index_revoc,
+    cred_json, cred_revoc_id, revoc_reg_delta_json = await \
+        utils.perform(steps, anoncreds.issuer_create_credential,
+                      wallet_handle, cred_offer, cred_req,
+                      json.dumps(constant.gvt_schema_attr_values), None, None,
                       ignore_exception=ignore_exception)
 
     if store_in_wallet:
@@ -332,11 +330,11 @@ async def create_and_store_claim(steps: step.Steps, wallet_handle: int,
                 and step_descriptions[2]:
             step_des = step_descriptions[2]
         steps.add_step(step_des)
-        await utils.perform(steps, anoncreds.prover_store_claim,
-                            wallet_handle, created_claim, None,
+        await utils.perform(steps, anoncreds.prover_store_credential,
+                            wallet_handle, None, cred_req_meta, cred_json, cred_def_json, None,
                             ignore_exception=ignore_exception)
 
-    return claim_req, revoc_update_json, created_claim
+    return cred_req, revoc_reg_delta_json, cred_json
 
 
 async def create_and_store_dids_and_verkeys(

@@ -8,7 +8,7 @@ with valid data.
 
 import json
 
-from indy import anoncreds, did
+from indy import anoncreds, did, ledger
 import pytest
 
 from test_scripts.functional_tests.anoncreds.anoncreds_test_base \
@@ -20,27 +20,56 @@ class TestIssuerCreateAndStoreClaimDefWithValidData(AnoncredsTestBase):
 
     @pytest.mark.asyncio
     async def test(self):
-        # 1. Create wallet.
-        # 2. Open wallet.
+        # 1. Create and open pool.
+        self.pool_handle = await common.create_and_open_pool_ledger_for_steps(
+            self.steps, self.pool_name, self.pool_genesis_txn_file)
+
+        # 2. Create and open wallet.
         self.wallet_handle = await common.create_and_open_wallet_for_steps(
-            self.steps, self.wallet_name, self.pool_name)
+            self.steps, self.wallet_name, self.pool_name, credentials=self.wallet_credentials)
 
         # 3. Create 'issuer_did'.
         self.steps.add_step("Create 'issuer_did'")
-        (issuer_did, _) = await utils.perform(self.steps,
-                                              did.create_and_store_my_did,
-                                              self.wallet_handle, "{}")
+        (issuer_did, issuer_vk) = await utils.perform(self.steps,
+                                                      did.create_and_store_my_did,
+                                                      self.wallet_handle, "{}")
 
-        # 4. Create and store claim definition and store
+        # 4. Create 'submitter_did'.
+        self.steps.add_step("Create 'submitter_did'")
+        await utils.perform(self.steps,
+                            did.create_and_store_my_did,
+                            self.wallet_handle, "{\"seed\":\"000000000000000000000000Trustee1\"}")
+
+        # 5. Add issuer to the ledger.
+        self.steps.add_step("Add issuer to the ledger")
+        req = await ledger.build_nym_request(
+            constant.did_default_trustee, issuer_did, issuer_vk, alias=None, role='TRUSTEE')
+        await utils.perform(self.steps,
+                            ledger.sign_and_submit_request,
+                            self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
+
+        # 6. Create and store claim definition and store
         # returned result as 'claim_def'.
         self.steps.add_step("Create and store claim definition and "
                             "store returned result as 'claim_def'")
-        claim_def = await utils.perform(
-            self.steps, anoncreds.issuer_create_and_store_claim_def,
-            self.wallet_handle, issuer_did, json.dumps(constant.gvt_schema),
-            constant.signature_type, False)
 
-        claim_def_primary = json.loads(claim_def)['data']['primary']
+        schema_id, schema_json = await anoncreds.issuer_create_schema(
+            issuer_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
+        schema_request = await ledger.build_schema_request(issuer_did, schema_json)
+        schema_result = await ledger.sign_and_submit_request(
+            self.pool_handle, self.wallet_handle, issuer_did, schema_request)
+        schema_json = json.loads(schema_json)
+        schema_json['seqNo'] = json.loads(schema_result)['result']['txnMetadata']['seqNo']
+        schema_json = json.dumps(schema_json)
+
+        cred_def_id, cred_def_json = await utils.perform(
+                                                self.steps,
+                                                anoncreds.issuer_create_and_store_credential_def,
+                                                self.wallet_handle, issuer_did,
+                                                schema_json, constant.tag,
+                                                constant.signature_type, constant.config_true)
+
+        claim_def_primary = json.loads(cred_def_json)['value']['primary']
 
         # 5. Check len(claim_def['data']['primary']['r']).
         self.steps.add_step("Check len(claim_def['data']['primary']['r'])")

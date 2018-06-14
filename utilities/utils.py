@@ -98,6 +98,8 @@ async def perform_with_expected_code(steps, func, *args, expected_code=0,
     """
     try:
         result = await func(*args)
+        if isinstance(result, tuple):
+            result = result[0]
         if json.loads(result)['op'] == 'REJECT':
             steps.get_last_step().set_status(Status.PASSED)
         elif json.loads(result)['op'] == 'REQNACK':

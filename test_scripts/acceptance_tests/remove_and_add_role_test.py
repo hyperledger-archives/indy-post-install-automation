@@ -38,6 +38,7 @@ class TestRemoveAndAddRole(TestScenarioBase):
             common.prepare_pool_and_wallet,
             self.pool_name,
             self.wallet_name,
+            self.wallet_credentials,
             pool_genesis_txn_file,
             ignore_exception=False)
 

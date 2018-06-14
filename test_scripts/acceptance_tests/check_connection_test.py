@@ -13,7 +13,7 @@ import json
 
 from indy import did, wallet, pool
 
-from utilities.constant import pool_genesis_txn_file
+from utilities.constant import *
 from utilities.test_scenario_base import TestScenarioBase
 from utilities.utils import perform
 
@@ -33,9 +33,9 @@ class TestCheckConnection(TestScenarioBase):
         # 2. Create wallet
         self.steps.add_step("Create wallet")
         await perform(self.steps, wallet.create_wallet, self.pool_name,
-                      self.wallet_name, None, None, None)
+                      self.wallet_name, None, None, wallet_credentials)
         self.wallet_handle = await perform(self.steps, wallet.open_wallet,
-                                           self.wallet_name, None, None)
+                                           self.wallet_name, None, wallet_credentials)
 
         # 3. Create DID
         self.steps.add_step("Create DID")

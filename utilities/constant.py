@@ -20,6 +20,7 @@ endpoint = "127.0.0.0:9700"
 decoded_verkey_length = 32
 decoded_did_length = 16
 crypto_type = "ed25519"
+wallet_credentials = "{\"key\":\"key\"}"
 
 # Information for seed_my2 = "00000000000000000000000000000My1"
 seed_my1 = "00000000000000000000000000000My1"
@@ -90,7 +91,7 @@ claim_uuid_key = "referent"   # Change to "referent" in next build
 
 # The path to the genesis transaction file is configurable.
 # The default directory is "/var/lib/indy/sandbox/".
-genesis_transaction_file_path = "/home/alexander/indy-post-install-automation/"
+genesis_transaction_file_path = "/home/indy/indy-post-install-automation/"
 pool_genesis_txn_file = \
     genesis_transaction_file_path + "pool_transactions_genesis"
 domain_transactions_sandbox_genesis = \
@@ -178,3 +179,24 @@ class KeysForRevocation(str, Enum):
     U = "u"
     PK = "pk"
     Y = "y"
+
+
+tag = 'default_tag'
+config_false = '{"support_revocation": false}'
+config_true = '{"support_revocation": true}'
+gvt_schema_name = 'gvt'
+gvt_schema_attr_names = '["age", "sex", "height", "name"]'
+gvt_schema_attr_values = \
+    {
+        "age": {"raw": "value1", "encoded": "1"},
+        "sex": {"raw": "value2", "encoded": "2"},
+        "height": {"raw": "value3", "encoded": "3"},
+        "name": {"raw": "value4", "encoded": "4"}
+    }
+xyz_schema_name = 'xyz'
+xyz_schema_attr_names = '["period", "status"]'
+xyz_schema_attr_values = \
+    {
+        "period": {"raw": "value1", "encoded": "1"},
+        "status": {"raw": "value2", "encoded": "2"}
+    }

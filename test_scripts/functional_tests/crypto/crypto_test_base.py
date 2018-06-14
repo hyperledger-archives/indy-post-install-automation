@@ -16,4 +16,5 @@ class CryptoTestBase(TestScenarioBase):
 
     async def teardown_steps(self):
         await common.close_and_delete_wallet(self.wallet_name,
-                                             self.wallet_handle)
+                                             self.wallet_handle,
+                                             self.wallet_credentials)

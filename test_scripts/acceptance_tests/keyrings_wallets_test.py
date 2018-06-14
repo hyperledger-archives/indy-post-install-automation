@@ -31,6 +31,7 @@ class TestKeyringsWallets(TestScenarioBase):
                                                common.prepare_pool_and_wallet,
                                                self.pool_name,
                                                self.wallet_name,
+                                               self.wallet_credentials,
                                                self.pool_genesis_txn_file)
 
         # 2. verify wallet was created in .indy/wallet
