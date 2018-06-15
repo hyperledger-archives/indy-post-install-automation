@@ -104,7 +104,7 @@ class TestIssuerCreateClaimDefsWith2DIDsAndTheSameSchema(AnoncredsTestBase):
         self.steps.add_step("Create and store claim definition for issuer2")
 
         schema2_id, schema2_json = await anoncreds.issuer_create_schema(
-            issuer1_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
+            issuer2_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
         schema2_request = await ledger.build_schema_request(issuer2_did, schema2_json)
         schema2_result = await ledger.sign_and_submit_request(
             self.pool_handle, self.wallet_handle, issuer2_did, schema2_request)

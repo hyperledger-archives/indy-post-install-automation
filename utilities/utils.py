@@ -326,7 +326,7 @@ def check_claim_attrs(claim_attrs, expected_claim):
 
 
 def check_gotten_claim_is_valid(steps, gotten_claim, expected_claim_json,
-                                issuer_did, schema_no):
+                                cred_def_id, schema_id):
     """
     Check if a gotten claim is valid.
     :param steps: steps of test case.
@@ -354,17 +354,17 @@ def check_gotten_claim_is_valid(steps, gotten_claim, expected_claim_json,
     steps.add_step("Check lst_claims[0]['issuer_did']")
     err_msg = "Issuer's did mismatches"
     check(steps, error_message=err_msg,
-          condition=lambda: gotten_claim["issuer_did"] == issuer_did)
+          condition=lambda: gotten_claim["cred_def_id"] == cred_def_id)
 
     # Check lst_claims[0]['issuer_did'].
     steps.add_step("Check lst_claims[0]['issuer_did']")
     err_msg = "Issuer's did mismatches"
     check(steps, error_message=err_msg,
-          condition=lambda: gotten_claim["schema_key"] == constant.gvt_schema_key)
+          condition=lambda: gotten_claim["schema_id"] == schema_id)
 
 
 def create_proof_req(nonce: str, name: str, version: str,
-                     requested_attrs: dict=None,
+                     requested_attributes: dict=None,
                      requested_predicates: dict=None) -> str:
     """
     Create a proof request.
@@ -381,7 +381,7 @@ def create_proof_req(nonce: str, name: str, version: str,
     """
 
     return json.dumps({"nonce": nonce, "name": name, "version": version,
-                       "requested_attrs": requested_attrs,
+                       "requested_attributes": requested_attributes,
                        "requested_predicates": requested_predicates})
 
 

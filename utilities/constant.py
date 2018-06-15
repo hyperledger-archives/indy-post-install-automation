@@ -47,17 +47,17 @@ gvt_schema = {
 gvt_schema_key = {'version': '1.0', 'name': 'gvt', 'did': 'V4SGRU86Z58d6TV7PBUe6f'}
 
 gvt_claim = {
-    "sex": ["male", str(int(hashlib.md5("male".encode()).
-                            hexdigest(), 16))],
+    "sex": ["M", str(int(hashlib.md5("M".encode()).
+                         hexdigest(), 16))],
     "name": ["Alex", str(int(hashlib.md5("Alex".encode()).
                              hexdigest(), 16))],
-    "height": ["175", str(int(hashlib.md5("175".encode()).
+    "height": ["180", str(int(hashlib.md5("180".encode()).
                               hexdigest(), 16))],
-    "age": ["28", str(int(hashlib.md5("28".encode()).hexdigest(), 16))]
+    "age": ["30", str(int(hashlib.md5("30".encode()).hexdigest(), 16))]
 }
 
 gvt_other_claim = {
-    "sex": ["female", str(int(hashlib.md5("female".encode()).
+    "sex": ["F", str(int(hashlib.md5("F".encode()).
                               hexdigest(), 16))],
     "name": ["Anna", str(int(hashlib.md5("Anna".encode()).
                              hexdigest(), 16))],
@@ -182,16 +182,24 @@ class KeysForRevocation(str, Enum):
 
 
 tag = 'default_tag'
+other_tag = 'other_tag'
 config_false = '{"support_revocation": false}'
 config_true = '{"support_revocation": true}'
 gvt_schema_name = 'gvt'
 gvt_schema_attr_names = '["age", "sex", "height", "name"]'
 gvt_schema_attr_values = \
     {
-        "age": {"raw": "value1", "encoded": "1"},
-        "sex": {"raw": "value2", "encoded": "2"},
-        "height": {"raw": "value3", "encoded": "3"},
-        "name": {"raw": "value4", "encoded": "4"}
+        "age": {"raw": "30", "encoded": "30"},
+        "sex": {"raw": "M", "encoded": "1"},
+        "height": {"raw": "180", "encoded": "180"},
+        "name": {"raw": "Alex", "encoded": "0"}
+    }
+gvt_schema_other_attr_values = \
+    {
+        "age": {"raw": "20", "encoded": "30"},
+        "sex": {"raw": "F", "encoded": "0"},
+        "height": {"raw": "160", "encoded": "180"},
+        "name": {"raw": "Anna", "encoded": "0"}
     }
 xyz_schema_name = 'xyz'
 xyz_schema_attr_names = '["period", "status"]'

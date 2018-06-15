@@ -275,7 +275,7 @@ def delete_wallet_folder(wallet_name: str):
 
 async def create_and_store_claim(steps: step.Steps, wallet_handle: int,
                                  prover_did: str, cred_offer: str,
-                                 cred_def_json: str, secret_name: str,
+                                 cred_def_json: str, secret_name: str, attr_values: str,
                                  store_in_wallet: bool=True,
                                  step_descriptions: list=None,
                                  ignore_exception: bool=False) -> \
@@ -320,7 +320,7 @@ async def create_and_store_claim(steps: step.Steps, wallet_handle: int,
     cred_json, cred_revoc_id, revoc_reg_delta_json = await \
         utils.perform(steps, anoncreds.issuer_create_credential,
                       wallet_handle, cred_offer, cred_req,
-                      json.dumps(constant.gvt_schema_attr_values), None, None,
+                      attr_values, None, None,
                       ignore_exception=ignore_exception)
 
     if store_in_wallet:
