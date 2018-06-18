@@ -88,7 +88,7 @@ class TestProverGetClaimReturnCorrectFormat(AnoncredsTestBase):
 
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
-            cred_offer, cred_def_json, constant.secret_name)
+            cred_offer, cred_def_json, constant.secret_name, json.dumps(constant.gvt_schema_attr_values))
 
         # 10. Get claims store in wallet.
         self.steps.add_step("Get claims store in wallet")

@@ -89,7 +89,7 @@ class TestProverGetClaimsForProofReqWithEmptyReqPredicateAndReqAttrs \
 
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
-            cred_offer, cred_def_json, constant.secret_name)
+            cred_offer, cred_def_json, constant.secret_name, json.dumps(constant.gvt_schema_attr_values))
 
         # 10. Get stored claims with proof request that
         # contains empty requested predicates and empty

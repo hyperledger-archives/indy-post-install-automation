@@ -189,10 +189,10 @@ gvt_schema_name = 'gvt'
 gvt_schema_attr_names = '["age", "sex", "height", "name"]'
 gvt_schema_attr_values = \
     {
-        "age": {"raw": "30", "encoded": "30"},
-        "sex": {"raw": "M", "encoded": "1"},
-        "height": {"raw": "180", "encoded": "180"},
-        "name": {"raw": "Alex", "encoded": "0"}
+        "age": {"raw": "30", "encoded": str(int(hashlib.md5("30".encode()).hexdigest(), 16))},
+        "sex": {"raw": "M", "encoded": str(int(hashlib.md5("M".encode()).hexdigest(), 16))},
+        "height": {"raw": "180", "encoded": str(int(hashlib.md5("180".encode()).hexdigest(), 16))},
+        "name": {"raw": "Alex", "encoded": str(int(hashlib.md5("Alex".encode()).hexdigest(), 16))}
     }
 gvt_schema_other_attr_values = \
     {
