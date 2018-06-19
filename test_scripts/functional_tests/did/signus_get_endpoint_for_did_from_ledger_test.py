@@ -27,7 +27,8 @@ class TestGetEndPointForDidFromLedger(TestScenarioBase):
         self.wallet_handle = await \
             common.create_and_open_wallet_for_steps(self.steps,
                                                     self.wallet_name,
-                                                    self.pool_name)
+                                                    self.pool_name,
+                                                    credentials=self.wallet_credentials)
 
         # 5. Create did and verkey with default trustee seed.
         self.steps.add_step("Create did and verkey with default trustee seed")

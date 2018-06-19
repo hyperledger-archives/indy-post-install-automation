@@ -23,13 +23,14 @@ class TestSignWithValidData(DidTestBase):
         self.wallet_handle = await \
             common.create_and_open_wallet_for_steps(self.steps,
                                                     self.wallet_name,
-                                                    self.pool_name)
+                                                    self.pool_name,
+                                                    credentials=self.wallet_credentials)
 
         # 4. Use "did.sign" to sign with unknown did and
         # verify that user cannot sign successfully.
         self.steps.add_step("Use 'did.sign' to sign with unknown did and "
                             "verify that user cannot sign successfully")
-        error_code = ErrorCode.WalletNotFoundError
+        error_code = ErrorCode.WalletItemNotFound
         await utils.perform_with_expected_code(self.steps, crypto.crypto_sign,
                                                self.wallet_handle,
                                                constant.verkey_my1,

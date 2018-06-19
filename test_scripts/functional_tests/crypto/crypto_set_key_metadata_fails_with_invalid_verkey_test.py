@@ -20,7 +20,7 @@ class TestCryptoSetKeyMetadataWithInvalidVerkey(CryptoTestBase):
         # 1. Create wallet.
         # 2. Open wallet.
         self.wallet_handle = await common.create_and_open_wallet_for_steps(
-            self.steps, self.wallet_name, self.pool_name)
+            self.steps, self.wallet_name, self.pool_name, credentials=self.wallet_credentials)
 
         # 3. Set metadata for invalid verkey and
         # verify that metadata cannot be set.
