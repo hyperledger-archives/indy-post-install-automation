@@ -58,12 +58,12 @@ class TestProverCreateClaimReq(AnoncredsTestBase):
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 5. Create master secret.
+        # 8. Create master secret.
         self.steps.add_step("Create master secret")
         await utils.perform(self.steps, anoncreds.prover_create_master_secret,
                             self.wallet_handle, constant.secret_name)
 
-        # 6. Create and store claim definition.
+        # 9. Create and store claim definition.
         self.steps.add_step("Create and store claim definition")
         schema_id, schema_json = await anoncreds.issuer_create_schema(
             issuer_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
@@ -81,7 +81,7 @@ class TestProverCreateClaimReq(AnoncredsTestBase):
             schema_json, constant.tag,
             constant.signature_type, constant.config_false)
 
-        # 7. Create claim request.
+        # 10. Create claim request.
         self.steps.add_step("Create claim request")
         cred_offer = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id)
 
@@ -92,7 +92,7 @@ class TestProverCreateClaimReq(AnoncredsTestBase):
             cred_offer, cred_def_json,
             constant.secret_name)
 
-        # 8. Check claim_req['blinded_ms'].
+        # 11. Check claim_req['blinded_ms'].
         self.steps.add_step("Check claim_req['blinded_ms']")
         err_msg = "claim_req['blinded_ms'] missing some fields"
         blinded_ms = json.loads(cred_req)["blinded_ms"]
@@ -100,25 +100,25 @@ class TestProverCreateClaimReq(AnoncredsTestBase):
                     condition=lambda: "prover_did" in json.loads(cred_req) and
                                       "u" in blinded_ms and "ur" in blinded_ms)
 
-        # 9. Check claim_req['blinded_ms']['prover_did'].
+        # 12. Check claim_req['blinded_ms']['prover_did'].
         self.steps.add_step("Check claim_req['blinded_ms']['prover_did']")
         err_msg = "Prover did in claim request mismatches"
         utils.check(self.steps, error_message=err_msg,
                     condition=lambda: json.loads(cred_req)["prover_did"] == prover_did)
 
-        # 10. Check claim_req['blinded_ms']['u'].
+        # 13. Check claim_req['blinded_ms']['u'].
         self.steps.add_step("Check claim_req['blinded_ms']['u']")
         err_msg = "claim_req['blinded_ms']['u'] is empty"
         utils.check(self.steps, error_message=err_msg,
                     condition=lambda: len(blinded_ms["u"]) > 0)
 
-        # 11. Check claim_req['blinded_ms']['ur'].
+        # 14. Check claim_req['blinded_ms']['ur'].
         self.steps.add_step("Check claim_req['blinded_ms']['ur']")
         err_msg = "claim_req['blinded_ms']['ur'] is not empty"
         utils.check(self.steps, error_message=err_msg,
                     condition=lambda: not blinded_ms["ur"])
 
-        # 12. Check claim_req['cred_def_id'].
+        # 15. Check claim_req['cred_def_id'].
         self.steps.add_step("Check claim_req['cred_def_id']")
         err_msg = "Issuer did in claim request mismatches"
         utils.check(self.steps, error_message=err_msg,

@@ -35,13 +35,13 @@ class TestIssuerCreateClaimWithInvalidWalletHandle(AnoncredsTestBase):
                             did.create_and_store_my_did,
                             self.wallet_handle, "{\"seed\":\"000000000000000000000000Trustee1\"}")
 
-        # 5. Create 'issuer_did'.
+        # 4. Create 'issuer_did'.
         self.steps.add_step("Create 'issuer_did'")
         (issuer_did, issuer_vk) = await utils.perform(self.steps,
                                                         did.create_and_store_my_did,
                                                         self.wallet_handle, "{}")
 
-        # 6. Add issuer to the ledger.
+        # 5. Add issuer to the ledger.
         self.steps.add_step("Add issuer to the ledger")
         req = await ledger.build_nym_request(
             constant.did_default_trustee, issuer_did, issuer_vk, alias=None, role='TRUSTEE')
@@ -49,13 +49,13 @@ class TestIssuerCreateClaimWithInvalidWalletHandle(AnoncredsTestBase):
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 7. Create 'prover_did'.
+        # 6. Create 'prover_did'.
         self.steps.add_step("Create 'prover_did'")
         (prover_did, prover_vk) = await utils.perform(self.steps,
                                                       did.create_and_store_my_did,
                                                       self.wallet_handle, '{}')
 
-        # 8. Add prover to the ledger.
+        # 7. Add prover to the ledger.
         self.steps.add_step("Add prover to the ledger")
         req = await ledger.build_nym_request(
             constant.did_default_trustee, prover_did, prover_vk, alias=None, role='TRUSTEE')
@@ -63,12 +63,12 @@ class TestIssuerCreateClaimWithInvalidWalletHandle(AnoncredsTestBase):
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 5. Create master secret.
+        # 8. Create master secret.
         self.steps.add_step("Create master secret")
         await utils.perform(self.steps, anoncreds.prover_create_master_secret,
                             self.wallet_handle, constant.secret_name)
 
-        # 6. Create and store claim definition.
+        # 9. Create and store claim definition.
         self.steps.add_step("Create and store claim definition")
 
         schema_id, schema_json = await anoncreds.issuer_create_schema(
@@ -87,7 +87,7 @@ class TestIssuerCreateClaimWithInvalidWalletHandle(AnoncredsTestBase):
             schema_json, constant.tag,
             constant.signature_type, constant.config_false)
 
-        # 7. Create claim request.
+        # 10. Create claim request.
         self.steps.add_step("Create claim request")
 
         cred_offer = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id)
@@ -99,7 +99,7 @@ class TestIssuerCreateClaimWithInvalidWalletHandle(AnoncredsTestBase):
             cred_offer, cred_def_json,
             constant.secret_name)
 
-        # 8. Create claim with invalid wallet handle and verify that
+        # 11. Create claim with invalid wallet handle and verify that
         # user cannot create claim.
         self.steps.add_step("Create claim with invalid wallet handle"
                             " and verify that user cannot create claim")

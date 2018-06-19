@@ -71,26 +71,26 @@ class TestIssuerCreateAndStoreClaimDefWithValidData(AnoncredsTestBase):
 
         claim_def_primary = json.loads(cred_def_json)['value']['primary']
 
-        # 5. Check len(claim_def['data']['primary']['r']).
+        # 7. Check len(claim_def['data']['primary']['r']).
         self.steps.add_step("Check len(claim_def['data']['primary']['r'])")
         error_message = "Length of claim_def['data']['primary']['r'] " \
                         "is not equal with 4"
         utils.check(self.steps, error_message,
                     condition=lambda: len(claim_def_primary['r']) == 4)
 
-        # 6. Check claim_def['data']['primary']['n'].
+        # 8. Check claim_def['data']['primary']['n'].
         self.__check_a_field_is_not_empty(claim_def_primary, 'n')
 
-        # 7. Check claim_def['data']['primary']['s'].
+        # 9. Check claim_def['data']['primary']['s'].
         self.__check_a_field_is_not_empty(claim_def_primary, 's')
 
-        # 8. Check claim_def['data']['primary']['rms'].
+        # 10. Check claim_def['data']['primary']['rms'].
         self.__check_a_field_is_not_empty(claim_def_primary, 'rms')
 
-        # 9. Check claim_def['data']['primary']['z'].
+        # 11. Check claim_def['data']['primary']['z'].
         self.__check_a_field_is_not_empty(claim_def_primary, "z")
 
-        # 10. Check claim_def['data']['primary']['rctxt'].
+        # 12. Check claim_def['data']['primary']['rctxt'].
         self.__check_a_field_is_not_empty(claim_def_primary, "rctxt")
 
     def __check_a_field_is_not_empty(self, claim_json_def_primary, key: str):

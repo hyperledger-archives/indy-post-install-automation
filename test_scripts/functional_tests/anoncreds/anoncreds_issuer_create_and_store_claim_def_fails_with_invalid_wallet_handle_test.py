@@ -65,7 +65,7 @@ class TestIssuerCreateAndStoreClaimDefWithInvalidWalletHandle\
         schema_json['seqNo'] = json.loads(schema_result)['result']['txnMetadata']['seqNo']
         schema_json = json.dumps(schema_json)
 
-        res = await utils.perform_with_expected_code(
+        await utils.perform_with_expected_code(
             self.steps, anoncreds.issuer_create_and_store_credential_def,
             self.wallet_handle + 1, issuer_did,
             schema_json, constant.tag,

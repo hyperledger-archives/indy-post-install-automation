@@ -137,25 +137,14 @@ class TestIssuerCreateClaimDefsWith2DIDsAndTheSameSchema(AnoncredsTestBase):
             self.steps, error_message=err_msg,
             condition=lambda: json.loads(cred_req1)['prover_did'] == prover_did)
 
-        # 11 Check gvt_claim_req1['schema_key']['name'].
-        # self.steps.add_step("gvt_claim_req1['schema_key']['name']")
-        # err_msg = "gvt_claim_req1['schema_key']['name'] isn't equal" + \
-        #     str(constant.gvt_schema['data']['name'])
-        # utils.check(
-        #     self.steps, error_message=err_msg,
-        #     condition=lambda: cred_req1['schema_key']['name'] ==
-        #     constant.gvt_schema['data']['name'])
-        #
-        # 12. Check gvt_claim_req1['schema_key']['did'].
-        # self.steps.add_step("gvt_claim_req1['schema_key']['did']")
-        # err_msg = "gvt_claim_req1['schema_key']['did'] isn't equal" + \
-        #           str(constant.gvt_schema['dest'])
-        # utils.check(
-        #     self.steps, error_message=err_msg,
-        #     condition=lambda: cred_req1['schema_key']['did'] ==
-        #                       constant.gvt_schema['dest'])
+        # 15. Check cred_def_id.
+        self.steps.add_step("Check cred_def_id")
+        err_msg = "cred_def_ids isn't equal"
+        utils.check(
+            self.steps, error_message=err_msg,
+            condition=lambda: json.loads(cred_req1)['cred_def_id'] == cred_def_id1)
 
-        # 15. Create claim request with issuer2.
+        # 16. Create claim request with issuer2.
         self.steps.add_step("Create claim request with issuer2")
         cred_offer2 = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id2)
 
@@ -166,27 +155,16 @@ class TestIssuerCreateClaimDefsWith2DIDsAndTheSameSchema(AnoncredsTestBase):
                                                 cred_offer2, cred_def_json2,
                                                 constant.secret_name)
 
-        # 16. Check gvt_claim_req2['prover_did'].
-        self.steps.add_step("gvt_claim_req2['issuer_did']")
-        err_msg = "gvt_claim_req2['issuer_did'] isn't equal prover_did"
+        # 17. Check gvt_claim_req2['prover_did'].
+        self.steps.add_step("gvt_claim_req2['prover_did']")
+        err_msg = "gvt_claim_req2['prover_did'] isn't equal prover_did"
         utils.check(
             self.steps, error_message=err_msg,
             condition=lambda: json.loads(cred_req2)['prover_did'] == prover_did)
 
-        # # 15. Check gvt_claim_req2['schema_key']['name'].
-        # self.steps.add_step("gvt_claim_req2['schema_key']['name']")
-        # err_msg = "gvt_claim_req2['schema_key']['name'] isn't equal" + \
-        #           str(constant.gvt_schema['data']['name'])
-        # utils.check(
-        #     self.steps, error_message=err_msg,
-        #     condition=lambda: gvt_claim_req2['schema_key']['name'] ==
-        #                       constant.gvt_schema['data']['name'])
-        #
-        # # 16. Check gvt_claim_req2['schema_key']['did'].
-        # self.steps.add_step("gvt_claim_req2['schema_key']['did']")
-        # err_msg = "gvt_claim_req2['schema_key']['did'] isn't equal" + \
-        #           str(constant.gvt_schema['dest'])
-        # utils.check(
-        #     self.steps, error_message=err_msg,
-        #     condition=lambda: gvt_claim_req2['schema_key']['did'] ==
-        #                       constant.gvt_schema['dest'])
+        # 18. Check cred_def_id.
+        self.steps.add_step("Check cred_def_id")
+        err_msg = "cred_def_ids isn't equal"
+        utils.check(
+            self.steps, error_message=err_msg,
+            condition=lambda: json.loads(cred_req2)['cred_def_id'] == cred_def_id2)

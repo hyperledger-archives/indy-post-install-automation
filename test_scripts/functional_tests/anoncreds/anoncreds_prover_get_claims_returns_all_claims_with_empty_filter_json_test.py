@@ -58,12 +58,12 @@ class TestProverGetAllClaimsWithEmptyFilterJson(AnoncredsTestBase):
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 5. Create master secret.
+        # 8. Create master secret.
         self.steps.add_step("Create master secret")
         await utils.perform(self.steps, anoncreds.prover_create_master_secret,
                             self.wallet_handle, constant.secret_name)
 
-        # 6. Create and store claim definition.
+        # 9. Create and store claim definition.
         self.steps.add_step("Create and store claim definition")
         schema_id, schema_json = await anoncreds.issuer_create_schema(
             issuer_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
@@ -80,7 +80,7 @@ class TestProverGetAllClaimsWithEmptyFilterJson(AnoncredsTestBase):
             schema_json, constant.tag,
             constant.signature_type, constant.config_false)
 
-        # 7. Create claim request.
+        # 10. Create claim request.
         self.steps.add_step("Create claim request")
         cred_offer = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id)
         cred_req, cred_req_meta = await utils.perform(
@@ -90,7 +90,7 @@ class TestProverGetAllClaimsWithEmptyFilterJson(AnoncredsTestBase):
             cred_offer, cred_def_json,
             constant.secret_name)
 
-        # 8. Create claim.
+        # 11. Create claim.
         self.steps.add_step("Create claim")
         cred_json1, cred_revoc_id1, revoc_reg_delta_json1 = await utils.perform(self.steps,
                                                                                 anoncreds.issuer_create_credential,
@@ -100,7 +100,7 @@ class TestProverGetAllClaimsWithEmptyFilterJson(AnoncredsTestBase):
                                                                                     constant.gvt_schema_attr_values),
                                                                                 None, None)
 
-        # 9. Create other claim.
+        # 12. Create other claim.
         self.steps.add_step("Create other claim")
         cred_json2, cred_revoc_id2, revoc_reg_delta_json2 = await utils.perform(self.steps,
                                                                                 anoncreds.issuer_create_credential,
@@ -110,14 +110,14 @@ class TestProverGetAllClaimsWithEmptyFilterJson(AnoncredsTestBase):
                                                                                     constant.gvt_schema_other_attr_values),
                                                                                 None, None)
 
-        # 10. Store claims into wallet.
+        # 13. Store claims into wallet.
         self.steps.add_step("Store claims into wallet")
         await utils.perform(self.steps, anoncreds.prover_store_credential,
                             self.wallet_handle, None, cred_req_meta, cred_json1, cred_def_json, None)
         await utils.perform(self.steps, anoncreds.prover_store_credential,
                             self.wallet_handle, None, cred_req_meta, cred_json2, cred_def_json, None)
 
-        # 11. Get claims store in wallet.
+        # 14. Get claims store in wallet.
         self.steps.add_step("Get claims store in wallet")
         lst_claims = await utils.perform(self.steps,
                                          anoncreds.prover_get_credentials,
@@ -125,7 +125,7 @@ class TestProverGetAllClaimsWithEmptyFilterJson(AnoncredsTestBase):
 
         lst_claims = json.loads(lst_claims)
 
-        # 12. Check returned claims.
+        # 15. Check returned claims.
         self.steps.add_step("Check returned claims")
         err_msg = "Returned claims is not a list with two elements"
         utils.check(self.steps, error_message=err_msg,

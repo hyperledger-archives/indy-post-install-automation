@@ -63,7 +63,7 @@ class TestProverStoreClaimOfferWithInvalidJson(AnoncredsTestBase):
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 4. Create and store claim definition.
+        # 8. Create and store claim definition.
         self.steps.add_step("Create and store claim definition")
         schema_id, schema_json = await anoncreds.issuer_create_schema(
             issuer_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
@@ -81,7 +81,7 @@ class TestProverStoreClaimOfferWithInvalidJson(AnoncredsTestBase):
                                                 schema_json, constant.tag,
                                                 constant.signature_type, constant.config_false)
 
-        # 5. Store claim offer with invalid json and
+        # 9. Store claim offer with invalid json and
         # verify that claim offer cannot be stored.
         self.steps.add_step("Store claim offer with invalid json and "
                             "verify that claim offer cannot be stored")

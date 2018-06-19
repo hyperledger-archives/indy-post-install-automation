@@ -60,12 +60,12 @@ class TestProverGetClaimsForProofReqWithEmptyReqPredicateAndReqAttrs \
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 5. Create master secret.
+        # 8. Create master secret.
         self.steps.add_step("Create master secret")
         await utils.perform(self.steps, anoncreds.prover_create_master_secret,
                             self.wallet_handle, constant.secret_name)
 
-        # 6. Create and store claim definition.
+        # 9. Create and store claim definition.
         self.steps.add_step("Create and store claim definition")
         schema_id, schema_json = await anoncreds.issuer_create_schema(
             issuer_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
@@ -82,16 +82,16 @@ class TestProverGetClaimsForProofReqWithEmptyReqPredicateAndReqAttrs \
             schema_json, constant.tag,
             constant.signature_type, constant.config_false)
 
-        # 7. Create claim request.
-        # 8. Create claim.
-        # 9. Store claims into wallet.
+        # 10. Create claim request.
+        # 11. Create claim.
+        # 12. Store claims into wallet.
         cred_offer = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id)
 
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
             cred_offer, cred_def_json, constant.secret_name, json.dumps(constant.gvt_schema_attr_values))
 
-        # 10. Get stored claims with proof request that
+        # 13. Get stored claims with proof request that
         # contains empty requested predicates and empty
         # requested attrs and store result into 'returned_claims'.
         self.steps.add_step(
@@ -107,13 +107,13 @@ class TestProverGetClaimsForProofReqWithEmptyReqPredicateAndReqAttrs \
 
         returned_claims = json.loads(returned_claims)
 
-        # 11. Check returned_claims['attrs'].
+        # 14. Check returned_claims['attrs'].
         self.steps.add_step("Check returned_claims['attrs']")
         err_msg = "returned_claims['attrs'] is not empty"
         utils.check(self.steps, error_message=err_msg,
                     condition=lambda: not returned_claims['attrs'])
 
-        # 12. Check returned_claims['predicates'].
+        # 15. Check returned_claims['predicates'].
         self.steps.add_step("Check returned_claims['predicates']")
         err_msg = "returned_claims['predicates'] is not empty"
         utils.check(self.steps, error_message=err_msg,

@@ -44,11 +44,6 @@ class TestVerifierVerifyProofWithClaimDefCreatedByOtherIssuer\
                             did.create_and_store_my_did,
                             self.wallet_handle, "{\"seed\":\"000000000000000000000000Trustee1\"}")
 
-        # 5. Create master secret.
-        self.steps.add_step("Create master secret")
-        await utils.perform(self.steps, anoncreds.prover_create_master_secret,
-                            self.wallet_handle, constant.secret_name)
-
         # 6. Add issuer to the ledger.
         self.steps.add_step("Add issuer to the ledger")
         req = await ledger.build_nym_request(
@@ -65,7 +60,12 @@ class TestVerifierVerifyProofWithClaimDefCreatedByOtherIssuer\
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 6. Create and store claim definition.
+        # 8. Create master secret.
+        self.steps.add_step("Create master secret")
+        await utils.perform(self.steps, anoncreds.prover_create_master_secret,
+                            self.wallet_handle, constant.secret_name)
+
+        # 9. Create and store claim definition.
         self.steps.add_step("Create and store claim definition")
         schema_id, schema_json = await anoncreds.issuer_create_schema(
             issuer_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
@@ -83,16 +83,16 @@ class TestVerifierVerifyProofWithClaimDefCreatedByOtherIssuer\
                                                 schema_json, constant.tag,
                                                 constant.signature_type, constant.config_false)
 
-        # 7. Create claim request.
-        # 8. Create claim.
-        # 9. Store claims into wallet.
+        # 10. Create claim request.
+        # 11. Create claim.
+        # 12. Store claims into wallet.
         cred_offer = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id)
 
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
             cred_offer, cred_def_json, constant.secret_name, json.dumps(constant.gvt_schema_attr_values))
 
-        # 10. Get stored claims with proof and
+        # 13. Get stored claims with proof and
         # store result into 'returned_claims'.
         self.steps.add_step(
             "Get stored claims with proof request "
@@ -107,7 +107,7 @@ class TestVerifierVerifyProofWithClaimDefCreatedByOtherIssuer\
 
         returned_claims = json.loads(returned_claims)
 
-        # 11. Create proof for proof request and
+        # 14. Create proof for proof request and
         # store result as "created_proof".
         self.steps.add_step("Create proof for proof request and "
                             "store result as 'created_proof'")
@@ -123,13 +123,13 @@ class TestVerifierVerifyProofWithClaimDefCreatedByOtherIssuer\
             proof_req, requested_claims_json,
             constant.secret_name,  schemas_json, claims_defs_json, '{}')
 
-        # 12. Create 'issuer_did2'.
+        # 15. Create 'issuer_did2'.
         self.steps.add_step("Create 'issuer_did2'")
         issuer_did2, issuer_vk2 = await  utils.perform(self.steps,
                                                        did.create_and_store_my_did,
                                                        self.wallet_handle, '{}')
 
-        # 13. Add issuer 2 to the ledger.
+        # 16. Add issuer 2 to the ledger.
         self.steps.add_step("Add issuer 2 to the ledger")
         req = await ledger.build_nym_request(
             constant.did_default_trustee, issuer_did2, issuer_vk2, alias=None, role='TRUSTEE')
@@ -137,12 +137,11 @@ class TestVerifierVerifyProofWithClaimDefCreatedByOtherIssuer\
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 13. Create and store other claim definition with 'issuer_did2'
+        # 17. Create and store other claim definition with 'issuer_did2'
         # and store returned result as 'gvt_claim_def2'.
         self.steps.add_step("Create and store other claim definition with "
                             "'issuer_did2' and store returned result as"
                             " 'gvt_claim_def2'")
-        self.steps.add_step("Create and store claim definition")
         schema_id2, schema_json2 = await anoncreds.issuer_create_schema(
             issuer_did2, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
         schema_request2 = await ledger.build_schema_request(issuer_did2, schema_json2)
@@ -159,7 +158,7 @@ class TestVerifierVerifyProofWithClaimDefCreatedByOtherIssuer\
                                                 schema_json2, constant.tag,
                                                 constant.signature_type, constant.config_false)
 
-        # 14. Verify created proof with incompatible claim defs json.
+        # 18. Verify created proof with incompatible claim defs json.
         self.steps.add_step("Verify created proof with "
                             "incompatible claim defs json")
         claims_defs_json2 = json.dumps({cred_def_id: json.loads(cred_def_json2)})

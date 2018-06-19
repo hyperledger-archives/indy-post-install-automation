@@ -59,12 +59,12 @@ class TestProverGetClaimReturnCorrectFormat(AnoncredsTestBase):
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 5. Create master secret.
+        # 8. Create master secret.
         self.steps.add_step("Create master secret")
         await utils.perform(self.steps, anoncreds.prover_create_master_secret,
                             self.wallet_handle, constant.secret_name)
 
-        # 6. Create and store claim definition.
+        # 9. Create and store claim definition.
         self.steps.add_step("Create and store claim definition")
         schema_id, schema_json = await anoncreds.issuer_create_schema(
             issuer_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
@@ -81,16 +81,16 @@ class TestProverGetClaimReturnCorrectFormat(AnoncredsTestBase):
             schema_json, constant.tag,
             constant.signature_type, constant.config_false)
 
-        # 7. Create claim request.
-        # 8. Create claim.
-        # 9. Store claim into wallet.
+        # 10. Create claim request.
+        # 11. Create claim.
+        # 12. Store claim into wallet.
         cred_offer = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id)
 
         await common.create_and_store_claim(
             self.steps, self.wallet_handle, prover_did,
             cred_offer, cred_def_json, constant.secret_name, json.dumps(constant.gvt_schema_attr_values))
 
-        # 10. Get claims store in wallet.
+        # 13. Get claims store in wallet.
         self.steps.add_step("Get claims store in wallet")
         lst_claims = await utils.perform(self.steps,
                                          anoncreds.prover_get_credentials,
@@ -98,22 +98,22 @@ class TestProverGetClaimReturnCorrectFormat(AnoncredsTestBase):
 
         lst_claims = json.loads(lst_claims)
 
-        # 11. Check returned claims.
+        # 14. Check returned claims.
         self.steps.add_step("Check returned claims")
         err_msg = "Returned claims is not a list"
         utils.check(self.steps, error_message=err_msg,
                     condition=lambda: isinstance(lst_claims, list))
 
-        # 12. Check lst_claims[0].
+        # 15. Check lst_claims[0].
         self.steps.add_step("Check lst_claims[0]")
         err_msg = "Length of lst_claim[0] is incorrect"
         utils.check(self.steps, error_message=err_msg,
                     condition=lambda: len(lst_claims[0]) == 6)
 
-        # 13. Check lst_claims[0]['claim_uuid'].
-        # 14. Check lst_claims[0]['attrs'].
-        # 15. Check lst_claims[0]['issuer_did'].
-        # 16. Check lst_claims[0]['schema_seq_no'].
+        # 16. Check lst_claims[0]['claim_uuid'].
+        # 17. Check lst_claims[0]['attrs'].
+        # 18. Check lst_claims[0]['issuer_did'].
+        # 19. Check lst_claims[0]['schema_seq_no'].
         utils.check_gotten_claim_is_valid(
             self.steps, lst_claims[0], constant.gvt_claim,
             cred_def_id, schema_id)

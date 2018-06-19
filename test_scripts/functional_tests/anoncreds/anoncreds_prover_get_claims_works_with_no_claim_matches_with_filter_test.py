@@ -59,12 +59,12 @@ class TestProverGetClaimsWorksWithNoClaimMatchesWithFilter(AnoncredsTestBase):
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 5. Create master secret.
+        # 8. Create master secret.
         self.steps.add_step("Create master secret")
         await utils.perform(self.steps, anoncreds.prover_create_master_secret,
                             self.wallet_handle, constant.secret_name)
 
-        # 6. Create and store claim definition.
+        # 9. Create and store claim definition.
         self.steps.add_step("Create and store claim definition")
         schema_id, schema_json = await anoncreds.issuer_create_schema(
             issuer_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
@@ -82,9 +82,9 @@ class TestProverGetClaimsWorksWithNoClaimMatchesWithFilter(AnoncredsTestBase):
                                                 schema_json, constant.tag,
                                                 constant.signature_type, constant.config_false)
 
-        # 7. Create claim request.
-        # 8. Create claim.
-        # 9. Store claim into wallet.
+        # 10. Create claim request.
+        # 11. Create claim.
+        # 12. Store claim into wallet.
         cred_offer = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id)
 
         description = ["Create claim request", "Create claim",
@@ -94,7 +94,7 @@ class TestProverGetClaimsWorksWithNoClaimMatchesWithFilter(AnoncredsTestBase):
             cred_offer, cred_def_json, constant.secret_name, json.dumps(constant.gvt_schema_attr_values),
             step_descriptions=description)
 
-        # 10. Get claims store in wallet.
+        # 13. Get claims store in wallet.
         self.steps.add_step("Get claims store in wallet")
         filter_json = json.dumps({"schema_id": '2QLecENh9u5cjCYb6V42X4:0:gvt:1.0'})
         lst_claims = await utils.perform(self.steps,
@@ -103,7 +103,7 @@ class TestProverGetClaimsWorksWithNoClaimMatchesWithFilter(AnoncredsTestBase):
 
         lst_claims = json.loads(lst_claims)
 
-        # 11. Check returned claims.
+        # 14. Check returned claims.
         self.steps.add_step("Check returned claims")
         err_msg = "Returned claims is not an empty list"
         utils.check(self.steps, error_message=err_msg,

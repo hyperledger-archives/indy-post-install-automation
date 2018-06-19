@@ -70,12 +70,12 @@ class TestProverGetClaimByFilteringWithIssuerDid(AnoncredsTestBase):
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 6. Create master secret.
+        # 8. Create master secret.
         self.steps.add_step("Create master secret")
         await utils.perform(self.steps, anoncreds.prover_create_master_secret,
                             self.wallet_handle, constant.secret_name)
 
-        # 7. Create and store claim definition with 'issuer1_did'.
+        # 9. Create and store claim definition with 'issuer1_did'.
         self.steps.add_step("Create and store claim definition "
                             "with 'issuer1_did'")
         schema1_id, schema1_json = await anoncreds.issuer_create_schema(
@@ -94,7 +94,7 @@ class TestProverGetClaimByFilteringWithIssuerDid(AnoncredsTestBase):
                                                 schema1_json, constant.tag,
                                                 constant.signature_type, constant.config_false)
 
-        # 8. Create and store other claim definition with 'issuer2_did'.
+        # 10. Create and store other claim definition with 'issuer2_did'.
         self.steps.add_step("Create and store other claim definition "
                             "with 'issuer2_did'")
         schema2_id, schema2_json = await anoncreds.issuer_create_schema(
@@ -113,9 +113,9 @@ class TestProverGetClaimByFilteringWithIssuerDid(AnoncredsTestBase):
                                                 schema2_json, constant.tag,
                                                 constant.signature_type, constant.config_false)
 
-        # 9. Create claim request with 'issuer1_did'.
-        # 10. Create claim.
-        # 11. Store claim into wallet.
+        # 11. Create claim request with 'issuer1_did'.
+        # 12. Create claim.
+        # 13. Store claim into wallet.
         cred_offer1 = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id1)
 
         descriptions = ["Create claim request with 'issuer1_did'",
@@ -125,9 +125,9 @@ class TestProverGetClaimByFilteringWithIssuerDid(AnoncredsTestBase):
             cred_offer1, cred_def_json1, constant.secret_name, json.dumps(constant.gvt_schema_attr_values),
             step_descriptions=descriptions)
 
-        # 12. Create other claim request with 'issuer2_did'.
-        # 13. Create other claim.
-        # 14. Store claim into wallet.
+        # 14. Create other claim request with 'issuer2_did'.
+        # 15. Create other claim.
+        # 16. Store claim into wallet.
         cred_offer2 = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id2)
 
         descriptions = ["Create other claim request with 'issuer2_did'",
@@ -137,7 +137,7 @@ class TestProverGetClaimByFilteringWithIssuerDid(AnoncredsTestBase):
             cred_offer2, cred_def_json2, constant.secret_name, json.dumps(constant.xyz_schema_attr_values),
             step_descriptions=descriptions)
 
-        # 15. Get stored claims by filtering with 'issuer1_did'.
+        # 17. Get stored claims by filtering with 'issuer1_did'.
         self.steps.add_step("Get stored claims by "
                             "filtering with 'issuer1_did'")
         filter_json = json.dumps({"issuer_did": issuer1_did})
@@ -147,16 +147,16 @@ class TestProverGetClaimByFilteringWithIssuerDid(AnoncredsTestBase):
 
         lst_claims = json.loads(lst_claims)
 
-        # 16. Check returned list claims.
+        # 18. Check returned list claims.
         self.steps.add_step("Check returned list claims")
         err_msg = "Cannot get claims from wallet"
         utils.check(self.steps, error_message=err_msg,
                     condition=lambda: len(lst_claims) == 1)
 
-        # 17. Check lst_claims[0]['claim_uuid'].
-        # 18. Check lst_claims[0]['attrs'].
-        # 19. Check lst_claims[0]['issuer_did'].
-        # 20. Check lst_claims[0]['schema_seq_no'].
+        # 19. Check lst_claims[0]['claim_uuid'].
+        # 20. Check lst_claims[0]['attrs'].
+        # 21. Check lst_claims[0]['issuer_did'].
+        # 22. Check lst_claims[0]['schema_seq_no'].
         utils.check_gotten_claim_is_valid(
             self.steps, lst_claims[0], constant.gvt_claim,
             cred_def_id1, schema1_id)

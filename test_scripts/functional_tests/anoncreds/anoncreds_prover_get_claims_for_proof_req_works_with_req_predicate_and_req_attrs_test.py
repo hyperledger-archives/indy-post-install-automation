@@ -60,12 +60,12 @@ class TestProverGetsClaimWithReqPredicateAndReqAttrs(AnoncredsTestBase):
                             ledger.sign_and_submit_request,
                             self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
 
-        # 5. Create master secret.
+        # 8. Create master secret.
         self.steps.add_step("Create master secret")
         await utils.perform(self.steps, anoncreds.prover_create_master_secret,
                             self.wallet_handle, constant.secret_name)
 
-        # 6. Create and store claim definition.
+        # 9. Create and store claim definition.
         self.steps.add_step("Create and store claim definition")
         schema_id, schema_json = await anoncreds.issuer_create_schema(
             issuer_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
@@ -82,7 +82,7 @@ class TestProverGetsClaimWithReqPredicateAndReqAttrs(AnoncredsTestBase):
             schema_json, constant.tag,
             constant.signature_type, constant.config_false)
 
-        # 7. Create claim request.
+        # 10. Create claim request.
         self.steps.add_step("Create claim request")
         cred_offer = await anoncreds.issuer_create_credential_offer(self.wallet_handle, cred_def_id)
         cred_req, cred_req_meta = await utils.perform(
@@ -92,7 +92,7 @@ class TestProverGetsClaimWithReqPredicateAndReqAttrs(AnoncredsTestBase):
             cred_offer, cred_def_json,
             constant.secret_name)
 
-        # 8. Create claim.
+        # 11. Create claim.
         self.steps.add_step("Create claim")
         cred_json, cred_revoc_id, revoc_reg_delta_json = await utils.perform(self.steps,
                                                                              anoncreds.issuer_create_credential,
@@ -100,12 +100,12 @@ class TestProverGetsClaimWithReqPredicateAndReqAttrs(AnoncredsTestBase):
                                                                              json.dumps(constant.gvt_schema_attr_values),
                                                                              None, None)
 
-        # 9. Store claims into wallet.
+        # 12. Store claims into wallet.
         self.steps.add_step("Store claims into wallet")
         await utils.perform(self.steps, anoncreds.prover_store_credential,
                             self.wallet_handle, None, cred_req_meta, cred_json, cred_def_json, None)
 
-        # 10. Get stored claims with proof request that
+        # 13. Get stored claims with proof request that
         # contains empty requested attrs and
         # store result into 'returned_claims'.
         self.steps.add_step(
@@ -120,21 +120,21 @@ class TestProverGetsClaimWithReqPredicateAndReqAttrs(AnoncredsTestBase):
             self.steps, anoncreds.prover_get_credentials_for_proof_req,
             self.wallet_handle, proof_req))
 
-        # 11. Get claim
+        # 14. Get claim
         self.steps.add_step("Get claims")
         lst_claims = json.loads(await utils.perform(
                                                 self.steps,
                                                 anoncreds.prover_get_credentials,
                                                 self.wallet_handle, "{}"))
 
-        # 12. Check returned_claims['attrs'].
+        # 15. Check returned_claims['attrs'].
         self.steps.add_step("Check returned_claims['attrs'] is correct")
         err_msg = "returned_claims['attrs'] is incorrect"
         utils.check(
             self.steps, error_message=err_msg, condition=lambda:
             returned_claims['attrs']['attr1_referent'][0]['cred_info'] == lst_claims[0])
 
-        # 13. Check returned_claims['predicates'].
+        # 16. Check returned_claims['predicates'].
         self.steps.add_step("Check returned_claims['predicates'] is correct")
         err_msg = "returned_claims['predicates'] is incorrect"
         utils.check(
