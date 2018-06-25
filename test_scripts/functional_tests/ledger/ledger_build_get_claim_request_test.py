@@ -7,10 +7,10 @@ Implementing test case GetClaimRequest with valid value.
 """
 import json
 
-from indy import did, ledger
+from indy import did, ledger, pool, anoncreds
 import pytest
 
-from utilities import common
+from utilities import common, constant, utils
 from utilities.constant import seed_default_trustee, signature_type, \
     get_claim_response, json_template
 from utilities.test_scenario_base import TestScenarioBase
@@ -21,49 +21,68 @@ class TestGetClaimRequest(TestScenarioBase):
 
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         # 1. Prepare pool and wallet. Get pool_handle, wallet_handle
         self.steps.add_step("Prepare pool and wallet")
         self.pool_handle, self.wallet_handle = await perform(
                                     self.steps, common.prepare_pool_and_wallet,
-                                    self.pool_name, self.wallet_name,
+                                    self.pool_name, self.wallet_name, self.wallet_credentials,
                                     self.pool_genesis_txn_file)
 
-        # 2. Create and store did
-        self.steps.add_step("Create DIDs")
-        (submitter_did, _) = await perform(
-                                    self.steps,
-                                    did.create_and_store_my_did,
-                                    self.wallet_handle,
-                                    json.dumps({"seed": seed_default_trustee}))
+        # 3. Create 'issuer_did'.
+        self.steps.add_step("Create 'issuer_did'")
+        issuer_did, issuer_vk = await utils.perform(self.steps,
+                                                    did.create_and_store_my_did,
+                                                    self.wallet_handle, "{}")
 
-        # 3. prepare data to build claim request
-        self.steps.add_step("build claim request")
-        ref = 1
-        data = '"primary":{"n":"1","s":"2","rms":"3",' \
-               '"r":{"name":"1"}, "rctxt":"1","z":"1"}'
-        data_request = '{' + data + '}'
-        claim_req = await perform(
-                                self.steps, ledger.build_claim_def_txn,
-                                submitter_did, ref,
-                                signature_type, data_request)
+        # 4. Create 'submitter_did'.
+        self.steps.add_step("Create 'submitter_did'")
+        await utils.perform(self.steps,
+                            did.create_and_store_my_did,
+                            self.wallet_handle, "{\"seed\":\"000000000000000000000000Trustee1\"}")
+
+        # 5. Add issuer to the ledger.
+        self.steps.add_step("Add issuer to the ledger")
+        req = await ledger.build_nym_request(
+            constant.did_default_trustee, issuer_did, issuer_vk, alias=None, role='TRUSTEE')
+        await utils.perform(self.steps,
+                            ledger.sign_and_submit_request,
+                            self.pool_handle, self.wallet_handle, constant.did_default_trustee, req)
+
+        # 7. Build and send SCHEMA and CRED_DEF requests and push it to the ledger.
+        self.steps.add_step("Build and send SCHEMA and CRED_DEF")
+        schema_id, schema_json = await anoncreds.issuer_create_schema(
+            issuer_did, constant.gvt_schema_name, "1.0", constant.gvt_schema_attr_names)
+        schema_request = await ledger.build_schema_request(issuer_did, schema_json)
+        schema_result = await utils.perform(self.steps,
+                                            ledger.sign_and_submit_request,
+                                            self.pool_handle, self.wallet_handle, issuer_did, schema_request)
+
+        schema_json = json.loads(schema_json)
+        schema_json['seqNo'] = json.loads(schema_result)['result']['txnMetadata']['seqNo']
+        schema_json = json.dumps(schema_json)
+
+        cred_def_id, cred_def_json = await \
+            anoncreds.issuer_create_and_store_credential_def(self.wallet_handle, issuer_did, schema_json, constant.tag,
+                                                             constant.signature_type, constant.config_true)
+        cred_def_req = await ledger.build_cred_def_request(issuer_did, cred_def_json)
 
         # 4. send claim request
         self.steps.add_step("send claim request")
         await perform(self.steps, ledger.sign_and_submit_request,
                       self.pool_handle, self.wallet_handle,
-                      submitter_did, claim_req)
+                      issuer_did, cred_def_req)
 
         # 5. build GET_CLAIM request
         self.steps.add_step("build get_claim request")
         # origin = "origin"
-        claim_req = json.loads(await perform(
-                                self.steps, ledger.build_get_claim_def_txn,
-                                submitter_did, ref,
-                                signature_type, submitter_did))
+        get_cred_req = json.loads(await perform(
+                                self.steps, ledger.build_get_cred_def_request,
+                                issuer_did, cred_def_id))
 
         # 6. Verify json get_claim request is correct.
         self.steps.add_step("Verify json get_claim request is correct.")
-        get_claim_op = get_claim_response.format("108", ref,
-                                                 signature_type, submitter_did)
-        expected_response = json_template(submitter_did, get_claim_op)
-        verify_json(self.steps, expected_response, claim_req)
+        err_msg = "Invalid request type"
+        utils.check(self.steps, error_message=err_msg,
+                    condition=lambda: get_cred_req['operation']['type'] == '108')

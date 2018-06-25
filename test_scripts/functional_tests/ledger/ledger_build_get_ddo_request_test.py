@@ -7,7 +7,7 @@ Implementing test case BuildDDORequest with valid value.
 """
 import json
 
-from indy import did, ledger
+from indy import did, ledger, pool
 import pytest
 
 from utilities import common
@@ -21,11 +21,13 @@ class TestBuildDDORequest(TestScenarioBase):
 
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         # 1. Prepare pool and wallet. Get pool_handle, wallet_handle
         self.steps.add_step("Prepare pool and wallet")
         self.pool_handle, self.wallet_handle = \
             await perform(self.steps, common.prepare_pool_and_wallet,
-                          self.pool_name, self.wallet_name,
+                          self.pool_name, self.wallet_name, self.wallet_credentials,
                           self.pool_genesis_txn_file)
 
         # 2. Create and store submitter did

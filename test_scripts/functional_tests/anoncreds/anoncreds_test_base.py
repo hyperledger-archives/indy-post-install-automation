@@ -8,11 +8,13 @@ Containing a base class for anoncreds testing.
 
 from utilities import common
 from utilities.test_scenario_base import TestScenarioBase
+from indy import pool
 
 
 class AnoncredsTestBase(TestScenarioBase):
 
     async def setup_steps(self):
+        await  pool.set_protocol_version(2)
         common.delete_wallet_folder(self.wallet_name)
 
     async def teardown_steps(self):

@@ -8,7 +8,7 @@ Implementing test case SubmitRequest with valid value.
 
 import json
 
-from indy import did, ledger
+from indy import did, ledger, pool
 import pytest
 
 from utilities import common
@@ -24,6 +24,8 @@ class TestSubmitRequest(TestScenarioBase):
 
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         # 1. Prepare pool and wallet. Get pool_handle, wallet_handle
         self.steps.add_step("Prepare pool and wallet")
         self.pool_handle, self.wallet_handle = \
@@ -31,6 +33,7 @@ class TestSubmitRequest(TestScenarioBase):
                           common.prepare_pool_and_wallet,
                           self.pool_name,
                           self.wallet_name,
+                          self.wallet_credentials,
                           self.pool_genesis_txn_file)
 
         # 2. Create and store did
@@ -65,7 +68,7 @@ class TestSubmitRequest(TestScenarioBase):
         type_request = "105"
         request_json = submit_request.format(1491566332010860,
                                              submitter_did, type_request,
-                                             target_did, signature)
+                                             target_did, signature, 2)
 
         # 5. Submit request
         response = json.loads(

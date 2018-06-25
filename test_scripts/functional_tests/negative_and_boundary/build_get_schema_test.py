@@ -7,7 +7,7 @@ Implementing negative test cases of get_schema.
 """
 import json
 
-from indy import did, ledger
+from indy import did, ledger, pool
 from indy.error import ErrorCode
 import pytest
 
@@ -68,6 +68,8 @@ class TestNegativeGetSchemaRequest(TestScenarioBase):
     @pytest.mark.skip
     @pytest.mark.asyncio
     async def test_bug_is540(self):
+        await  pool.set_protocol_version(2)
+
         # 1. Prepare pool and wallet. Get pool_handle, wallet_handle
         self.steps.add_step("Prepare pool and wallet")
         self.pool_handle, self.wallet_handle = \
@@ -75,6 +77,7 @@ class TestNegativeGetSchemaRequest(TestScenarioBase):
                           common.prepare_pool_and_wallet,
                           self.pool_name,
                           self.wallet_name,
+                          self.wallet_credentials,
                           self.pool_genesis_txn_file)
 
         # 2. Create and store did
@@ -136,6 +139,8 @@ class TestNegativeGetSchemaRequest(TestScenarioBase):
     @pytest.mark.asyncio
     @pytest.mark.parametrize("argvalues", data_test[0], ids=data_test[1])
     async def test_negative_cases(self, argvalues):
+        await  pool.set_protocol_version(2)
+
         # 0. initial data
         submitter_did = argvalues[0]
         schema_did = argvalues[1]
@@ -149,6 +154,7 @@ class TestNegativeGetSchemaRequest(TestScenarioBase):
                           common.prepare_pool_and_wallet,
                           self.pool_name,
                           self.wallet_name,
+                          self.wallet_credentials,
                           self.pool_genesis_txn_file)
 
         # 2. Create and store did

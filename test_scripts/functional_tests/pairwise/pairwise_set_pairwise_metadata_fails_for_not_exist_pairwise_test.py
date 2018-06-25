@@ -21,7 +21,7 @@ class TestSetPairwiseMetadataForNotExistPairwise(PairwiseTestBase):
         # 1. Create wallet.
         # 2. Open wallet.
         self.wallet_handle = await common.create_and_open_wallet_for_steps(
-            self.steps, self.wallet_name, self.pool_name)
+            self.steps, self.wallet_name, self.pool_name, credentials=self.wallet_credentials)
 
         # 3. Create and "their_did".
         self.steps.add_step("Create 'their_did'")
@@ -40,7 +40,7 @@ class TestSetPairwiseMetadataForNotExistPairwise(PairwiseTestBase):
         self.steps.add_step("Set metadata for not exist pairwise and "
                             "verify that metadata cannot be set")
         metadata = "Test pairwise"
-        error_code = ErrorCode.WalletNotFoundError
+        error_code = ErrorCode.WalletItemNotFound
         await utils.perform_with_expected_code(self.steps,
                                                pairwise.set_pairwise_metadata,
                                                self.wallet_handle, their_did,

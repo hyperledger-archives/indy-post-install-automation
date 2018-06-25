@@ -5,7 +5,7 @@ Created on Dec 8, 2017
 
 Implementing test case CloseWallet with valid value.
 """
-from indy import wallet, did
+from indy import wallet, did, pool
 from indy.error import ErrorCode
 import pytest
 
@@ -16,12 +16,14 @@ from utilities.utils import perform, perform_with_expected_code
 
 class TestCloseWallet(TestScenarioBase):
     async def teardown_steps(self):
-        await perform(self.steps, wallet.delete_wallet, self.wallet_name, None)
+        await perform(self.steps, wallet.delete_wallet, self.wallet_name, self.wallet_credentials)
         common.clean_up_pool_and_wallet_folder(self.pool_name,
                                                self.wallet_name)
 
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         # 1. Create and open a pool
         self.steps.add_step("Create pool Ledger")
         self.pool_handle = await perform(self.steps,
@@ -33,7 +35,7 @@ class TestCloseWallet(TestScenarioBase):
         self.steps.add_step("Create and open wallet")
         self.wallet_handle = await perform(self.steps,
                                            common.create_and_open_wallet,
-                                           self.pool_name, self.wallet_name)
+                                           self.pool_name, self.wallet_name, self.wallet_credentials)
 
         # 3. Close wallet
         self.steps.add_step("Close wallet.")

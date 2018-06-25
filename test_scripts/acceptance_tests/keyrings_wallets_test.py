@@ -12,7 +12,7 @@ import pytest
 import json
 import os.path
 
-from indy import did
+from indy import did, pool
 
 from utilities import common
 from utilities.constant import seed_default_trustee, work_dir
@@ -24,6 +24,8 @@ from utilities.utils import perform
 class TestKeyringsWallets(TestScenarioBase):
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         # 1. Create and open pool Ledger
         self.steps.add_step("Create and open pool Ledger")
         self.pool_handle, self.wallet_handle = await perform(

@@ -119,7 +119,7 @@ operation_fields = '"type":"{}","dest":"{}"'
 
 submit_request = '{{"reqId": {:d}, "identifier": "{}", ' \
                  '"operation": {{ "type": "{}", "dest": "{}"}},' \
-                 ' "signature": "{}"}}'
+                 ' "signature": "{}", "protocolVersion": {}}}'
 
 submit_response = '{{"result": {{ ' \
                   '"identifier": "{}", "dest": "{}", ' \

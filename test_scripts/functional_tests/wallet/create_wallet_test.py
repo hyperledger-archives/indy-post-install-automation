@@ -6,7 +6,7 @@ Implementing test case create_wallet with valid value.
 """
 import os
 
-from indy import wallet
+from indy import wallet, pool
 from indy.error import IndyError
 import pytest
 
@@ -25,6 +25,8 @@ class TestCreateWallet(TestScenarioBase):
     @pytest.mark.asyncio
     async def test(self):
         try:
+            await  pool.set_protocol_version(2)
+
             # 1. Create and open a pool
             self.steps.add_step("Create pool Ledger")
             self.pool_handle = await perform(self.steps,
@@ -36,7 +38,7 @@ class TestCreateWallet(TestScenarioBase):
             self.steps.add_step("Create wallet")
             returned_code = await perform(self.steps, wallet.create_wallet,
                                           self.pool_name, self.wallet_name,
-                                          None, None, None)
+                                          None, None, self.wallet_credentials)
 
             # 3. Verify new created wallet folder exists
             self.steps.add_step("Verify new created wallet folder exists")

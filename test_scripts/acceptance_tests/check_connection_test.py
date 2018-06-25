@@ -23,6 +23,8 @@ class TestCheckConnection(TestScenarioBase):
 
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         pool_config = json.dumps(
             {"genesis_txn": str(pool_genesis_txn_file)})
         # 1. Create pool ledger

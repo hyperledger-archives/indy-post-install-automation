@@ -7,7 +7,7 @@ Implementing test case SignRequest with valid value.
 """
 import json
 
-from indy import did, ledger
+from indy import did, ledger, pool
 import pytest
 
 from utilities import common, constant
@@ -20,6 +20,8 @@ class TestSignRequest(TestScenarioBase):
 
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         # Prepare data to test.
         message = json.dumps(
             {
@@ -40,7 +42,7 @@ class TestSignRequest(TestScenarioBase):
         self.steps.add_step("Prepare pool and wallet")
         self.pool_handle, self.wallet_handle = \
             await perform(self.steps, common.prepare_pool_and_wallet,
-                          self.pool_name, self.wallet_name,
+                          self.pool_name, self.wallet_name, self.wallet_credentials,
                           self.pool_genesis_txn_file)
 
         # 2. Create and store did

@@ -63,9 +63,6 @@ class TestSendAllTxnsTypesToLedger(MiscTestBase):
                                             self.pool_handle, self.wallet_handle, issuer_did, schema_request)
 
         schema_json = json.loads(schema_json)
-        # For 1.3.375.
-        # schema_json['seqNo'] = json.loads(schema_result)['result']['seqNo']
-        # For 1.4.470.
         schema_json['seqNo'] = json.loads(schema_result)['result']['txnMetadata']['seqNo']
         schema_json = json.dumps(schema_json)
 

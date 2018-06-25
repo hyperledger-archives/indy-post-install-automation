@@ -44,6 +44,8 @@ class TestMessagesOnConnection(TestScenarioBase):
     @pytest.mark.skip
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         # 1. Create ledger config from genesis txn file
         self.steps.add_step("Create Ledger ->")
         pool_config = json.dumps(

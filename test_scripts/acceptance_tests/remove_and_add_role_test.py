@@ -12,7 +12,7 @@ import time
 import pytest
 import json
 
-from indy import ledger, did
+from indy import ledger, did, pool
 
 from utilities import common
 from utilities import utils
@@ -25,6 +25,8 @@ from utilities.test_scenario_base import TestScenarioBase
 class TestRemoveAndAddRole(TestScenarioBase):
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         """
         This function is the main part of test script.
         All steps that involve to role TGB(9, 10, a half of 24) will be skipped

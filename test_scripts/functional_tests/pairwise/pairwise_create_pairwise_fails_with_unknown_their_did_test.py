@@ -20,7 +20,7 @@ class TestCreatePairwiseWithUnknownTheirDid(PairwiseTestBase):
         # 1. Create wallet.
         # 2. Open wallet.
         self.wallet_handle = await common.create_and_open_wallet_for_steps(
-            self.steps, self.wallet_name, self.pool_name)
+            self.steps, self.wallet_name, self.pool_name, credentials=self.wallet_credentials)
 
         # 3. Create and store 'my_did' by random seed.
         self.steps.add_step("Create and store 'my_did' by random seed")
@@ -32,7 +32,7 @@ class TestCreatePairwiseWithUnknownTheirDid(PairwiseTestBase):
         # verify that pairwise cannot be created.
         self.steps.add_step("Create pairwise with unknown 'their_did' and "
                             "verify that pairwise cannot be created")
-        error_code = ErrorCode.WalletNotFoundError
+        error_code = ErrorCode.WalletItemNotFound
         await utils.perform_with_expected_code(self.steps,
                                                pairwise.create_pairwise,
                                                self.wallet_handle,
