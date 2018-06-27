@@ -136,6 +136,8 @@ class TestNegativeGetSchemaRequest(TestScenarioBase):
 
     data_test = generate_argvalues_and_ids()
 
+    @pytest.mark.skip
+    # ledger.build_get_schema_request takes DID and schema_id only so we cannot request schema with incorrect fields
     @pytest.mark.asyncio
     @pytest.mark.parametrize("argvalues", data_test[0], ids=data_test[1])
     async def test_negative_cases(self, argvalues):

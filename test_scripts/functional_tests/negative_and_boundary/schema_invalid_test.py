@@ -118,6 +118,8 @@ invalid_common_structure_data = generate_common_invalid_structure_schemas()
 
 class TestInvalidSchema(TestScenarioBase):
 
+    @pytest.mark.skip
+    # Should be completely reworked with anoncreds' schema_json parameterization
     @pytest.mark.parametrize("schema_data",
                              invalid_common_structure_data[0],
                              ids=invalid_common_structure_data[1])
@@ -153,6 +155,8 @@ class TestInvalidSchema(TestScenarioBase):
             self.steps, ledger.build_schema_request, did_default_trustee,
             json.dumps(schema_data['data']), expected_code=schema_data['err'])
 
+    @pytest.mark.skip
+    # Should be completely reworked with anoncreds' schema_json parameterization
     @pytest.mark.parametrize("schema_data",
                              invalid_transaction_data[0],
                              ids=invalid_transaction_data[1])
