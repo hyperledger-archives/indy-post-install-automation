@@ -1,3 +1,5 @@
+*** THIS REPOSITORY IS OUTDATED AND WILL BE ARCHIVED SOON. SEE https://github.com/hyperledger/indy-test-automation FOR ACTUAL INDY TEST AUTOMATION WORK. ***
+
 # Indy Python wrapper test
 
 This is a Python wrapper test for Indy, using pytest, a framework that makes building simple and scalable tests easy.
