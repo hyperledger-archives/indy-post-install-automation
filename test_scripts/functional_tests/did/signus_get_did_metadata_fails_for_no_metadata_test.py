@@ -23,7 +23,8 @@ class TestGetMetadataForNoMetadata(DidTestBase):
         self.wallet_handle = await \
             common.create_and_open_wallet_for_steps(self.steps,
                                                     self.wallet_name,
-                                                    self.pool_name)
+                                                    self.pool_name,
+                                                    credentials=self.wallet_credentials)
 
         # 3. Create did and verkey with empty json.
         self.steps.add_step("Create did and verkey with empty json")
@@ -35,7 +36,7 @@ class TestGetMetadataForNoMetadata(DidTestBase):
         # verify that metadata cannot be gotten.
         self.steps.add_step("Get metadata of 'my_did' and "
                             "verify that metadata cannot be gotten")
-        error_code = ErrorCode.WalletNotFoundError
+        error_code = ErrorCode.WalletItemNotFound
         await utils.perform_with_expected_code(self.steps,
                                                did.get_did_metadata,
                                                self.wallet_handle, my_did,

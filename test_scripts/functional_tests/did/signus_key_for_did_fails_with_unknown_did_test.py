@@ -10,10 +10,11 @@ import pytest
 from indy import did
 from indy.error import ErrorCode
 from utilities import utils, common, constant
-from utilities.test_scenario_base import TestScenarioBase
+from test_scripts.functional_tests.did.signus_test_base\
+    import DidTestBase
 
 
-class TestKeyForDidWithUnknownDid(TestScenarioBase):
+class TestKeyForDidWithUnknownDid(DidTestBase):
     @pytest.mark.asyncio
     async def test(self):
         # 1. Create pool ledger config.
@@ -27,13 +28,14 @@ class TestKeyForDidWithUnknownDid(TestScenarioBase):
         self.wallet_handle = await \
             common.create_and_open_wallet_for_steps(self.steps,
                                                     self.wallet_name,
-                                                    self.pool_name)
+                                                    self.pool_name,
+                                                    credentials=self.wallet_credentials)
 
         # 5. Get verkey for unknown did and verify that user cannot get
         # verkey for an unknown did.
         self.steps.add_step("Get verkey for unknown did and verify that "
                             "user cannot get verkey for an unknown did")
-        error_code = ErrorCode.CommonInvalidState
+        error_code = ErrorCode.WalletItemNotFound
         await utils.perform_with_expected_code(self.steps, did.key_for_did,
                                                self.pool_handle,
                                                self.wallet_handle,

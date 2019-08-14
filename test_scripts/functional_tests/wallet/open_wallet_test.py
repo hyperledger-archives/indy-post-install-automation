@@ -11,12 +11,15 @@ from utilities import common
 from utilities.result import Status
 from utilities.test_scenario_base import TestScenarioBase
 from utilities.utils import perform
+from indy import pool
 
 
 class TestOpenWallet(TestScenarioBase):
 
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         # 1. Create and open a pool
         self.steps.add_step("Create and open a pool")
         self.pool_handle = await perform(self.steps,
@@ -28,7 +31,7 @@ class TestOpenWallet(TestScenarioBase):
         self.steps.add_step("Create and open a wallet")
         returned_code = await perform(self.steps,
                                       common.create_and_open_wallet,
-                                      self.pool_name, self.wallet_name)
+                                      self.pool_name, self.wallet_name, self.wallet_credentials)
 
         # 3. Verify that user is able to open a new wallet
         self.steps.add_step("Verify the response code of open_wallet API.")

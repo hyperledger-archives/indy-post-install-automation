@@ -1,17 +1,9 @@
-"""
-Created on Dec 20, 2017
-
-@author: nhan.nguyen
-
-Containing a base class for pairwise testing.
-"""
-
 from utilities import common
 from utilities.test_scenario_base import TestScenarioBase
 from indy import pool
 
 
-class PairwiseTestBase(TestScenarioBase):
+class MiscTestBase(TestScenarioBase):
 
     async def setup_steps(self):
         await  pool.set_protocol_version(2)

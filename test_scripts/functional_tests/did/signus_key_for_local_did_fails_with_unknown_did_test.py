@@ -22,13 +22,14 @@ class TestGetKeyForLocalDidWithUnknownDid(DidTestBase):
         self.wallet_handle = await \
             common.create_and_open_wallet_for_steps(self.steps,
                                                     self.wallet_name,
-                                                    self.pool_name)
+                                                    self.pool_name,
+                                                    credentials=self.wallet_credentials)
 
         # 3. Get local verkey with unknown did and
         # verify that verkey cannot be gotten.
         self.steps.add_step("Get local verkey with unknown did and "
                             "verify that verkey cannot be gotten")
-        err_code = ErrorCode.WalletNotFoundError
+        err_code = ErrorCode.WalletItemNotFound
         await utils.perform_with_expected_code(self.steps,
                                                did.key_for_local_did,
                                                self.wallet_handle,

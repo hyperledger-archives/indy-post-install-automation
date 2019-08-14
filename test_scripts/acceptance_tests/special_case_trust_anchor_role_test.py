@@ -11,7 +11,7 @@ Verify that user can use 'TrustAnchor' role to do some special cases.
 import pytest
 import json
 
-from indy import ledger, did
+from indy import ledger, did, pool
 
 from utilities import common
 from utilities.utils import generate_random_string, perform, \
@@ -23,6 +23,8 @@ from utilities.test_scenario_base import TestScenarioBase
 class TestSpecialCaseTrustAnchorRole(TestScenarioBase):
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         # Declare all values use in the test
         seed_trustee1 = generate_random_string(prefix="Trustee1", size=32)
         seed_trustee2 = generate_random_string(prefix="Trustee2", size=32)
@@ -41,6 +43,7 @@ class TestSpecialCaseTrustAnchorRole(TestScenarioBase):
                                                 common.prepare_pool_and_wallet,
                                                 self.pool_name,
                                                 self.wallet_name,
+                                                self.wallet_credentials,
                                                 self.pool_genesis_txn_file,
                                                 ignore_exception=False)
 

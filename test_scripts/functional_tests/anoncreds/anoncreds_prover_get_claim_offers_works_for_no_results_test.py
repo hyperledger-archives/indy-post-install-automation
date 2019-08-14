@@ -18,6 +18,8 @@ from utilities import utils, common
 
 class TestProverGetClaimOffersForNoResults(AnoncredsTestBase):
 
+    @pytest.mark.skip
+    # Method under test is deleted.
     @pytest.mark.asyncio
     async def test(self):
         # 1. Create wallet.

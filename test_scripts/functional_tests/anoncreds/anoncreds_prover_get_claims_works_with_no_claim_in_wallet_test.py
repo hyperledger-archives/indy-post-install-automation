@@ -19,15 +19,21 @@ class TestProverGetClaimWithNoClaimInWallet(AnoncredsTestBase):
 
     @pytest.mark.asyncio
     async def test(self):
-        # 1. Create wallet.
-        # 2. Open wallet.
-        self.wallet_handle = await common.create_and_open_wallet_for_steps(
-            self.steps, self.wallet_name, self.pool_name)
+        # 1. Create and open pool.
+        self.pool_handle = await common.create_and_open_pool_ledger_for_steps(
+            self.steps, self.pool_name, self.pool_genesis_txn_file)
+
+        # 2. Create and open wallet.
+        self.wallet_handle = await \
+            common.create_and_open_wallet_for_steps(self.steps,
+                                                    self.wallet_name,
+                                                    self.pool_name,
+                                                    credentials=self.wallet_credentials)
 
         # 3. Get stored claims in wallet.
         self.steps.add_step("Get stored claims in wallet")
         lst_claims = await utils.perform(self.steps,
-                                         anoncreds.prover_get_claims,
+                                         anoncreds.prover_get_credentials,
                                          self.wallet_handle, '{}')
 
         lst_claims = json.loads(lst_claims)

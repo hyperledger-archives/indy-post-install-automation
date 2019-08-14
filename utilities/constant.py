@@ -20,6 +20,7 @@ endpoint = "127.0.0.0:9700"
 decoded_verkey_length = 32
 decoded_did_length = 16
 crypto_type = "ed25519"
+wallet_credentials = "{\"key\":\"key\"}"
 
 # Information for seed_my2 = "00000000000000000000000000000My1"
 seed_my1 = "00000000000000000000000000000My1"
@@ -46,17 +47,17 @@ gvt_schema = {
 gvt_schema_key = {'version': '1.0', 'name': 'gvt', 'did': 'V4SGRU86Z58d6TV7PBUe6f'}
 
 gvt_claim = {
-    "sex": ["male", str(int(hashlib.md5("male".encode()).
-                            hexdigest(), 16))],
+    "sex": ["M", str(int(hashlib.md5("M".encode()).
+                         hexdigest(), 16))],
     "name": ["Alex", str(int(hashlib.md5("Alex".encode()).
                              hexdigest(), 16))],
-    "height": ["175", str(int(hashlib.md5("175".encode()).
+    "height": ["180", str(int(hashlib.md5("180".encode()).
                               hexdigest(), 16))],
-    "age": ["28", str(int(hashlib.md5("28".encode()).hexdigest(), 16))]
+    "age": ["30", str(int(hashlib.md5("30".encode()).hexdigest(), 16))]
 }
 
 gvt_other_claim = {
-    "sex": ["female", str(int(hashlib.md5("female".encode()).
+    "sex": ["F", str(int(hashlib.md5("F".encode()).
                               hexdigest(), 16))],
     "name": ["Anna", str(int(hashlib.md5("Anna".encode()).
                              hexdigest(), 16))],
@@ -90,7 +91,7 @@ claim_uuid_key = "referent"   # Change to "referent" in next build
 
 # The path to the genesis transaction file is configurable.
 # The default directory is "/var/lib/indy/sandbox/".
-genesis_transaction_file_path = "/home/alexander/indy-post-install-automation/"
+genesis_transaction_file_path = "/home/indy/indy-post-install-automation/"
 pool_genesis_txn_file = \
     genesis_transaction_file_path + "pool_transactions_genesis"
 domain_transactions_sandbox_genesis = \
@@ -118,7 +119,7 @@ operation_fields = '"type":"{}","dest":"{}"'
 
 submit_request = '{{"reqId": {:d}, "identifier": "{}", ' \
                  '"operation": {{ "type": "{}", "dest": "{}"}},' \
-                 ' "signature": "{}"}}'
+                 ' "signature": "{}", "protocolVersion": {}}}'
 
 submit_response = '{{"result": {{ ' \
                   '"identifier": "{}", "dest": "{}", ' \
@@ -178,3 +179,32 @@ class KeysForRevocation(str, Enum):
     U = "u"
     PK = "pk"
     Y = "y"
+
+
+tag = 'default_tag'
+other_tag = 'other_tag'
+config_false = '{"support_revocation": false}'
+config_true = '{"support_revocation": true}'
+gvt_schema_name = 'gvt'
+gvt_schema_attr_names = '["age", "sex", "height", "name"]'
+gvt_schema_attr_values = \
+    {
+        "age": {"raw": "30", "encoded": str(int(hashlib.md5("30".encode()).hexdigest(), 16))},
+        "sex": {"raw": "M", "encoded": str(int(hashlib.md5("M".encode()).hexdigest(), 16))},
+        "height": {"raw": "180", "encoded": str(int(hashlib.md5("180".encode()).hexdigest(), 16))},
+        "name": {"raw": "Alex", "encoded": str(int(hashlib.md5("Alex".encode()).hexdigest(), 16))}
+    }
+gvt_schema_other_attr_values = \
+    {
+        "age": {"raw": "20", "encoded": "30"},
+        "sex": {"raw": "F", "encoded": "0"},
+        "height": {"raw": "160", "encoded": "180"},
+        "name": {"raw": "Anna", "encoded": "0"}
+    }
+xyz_schema_name = 'xyz'
+xyz_schema_attr_names = '["period", "status"]'
+xyz_schema_attr_values = \
+    {
+        "period": {"raw": "value1", "encoded": "1"},
+        "status": {"raw": "value2", "encoded": "2"}
+    }

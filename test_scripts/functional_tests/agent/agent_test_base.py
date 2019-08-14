@@ -6,7 +6,7 @@ Created on Dec 20, 2017
 Containing a base class for agent testing.
 """
 
-from indy import crypto
+from indy import crypto, pool
 from utilities import utils, common
 from utilities.test_scenario_base import TestScenarioBase
 
@@ -19,11 +19,13 @@ class AgentTestBase(TestScenarioBase):
     encrypted_msg = None
 
     async def setup_steps(self):
+        await  pool.set_protocol_version(2)
         common.delete_wallet_folder(self.wallet_name)
 
     async def teardown_steps(self):
         await common.close_and_delete_wallet(self.wallet_name,
-                                             self.wallet_handle)
+                                             self.wallet_handle,
+                                             self.wallet_credentials)
 
     async def _parsed_and_check_encrypted_msg_auth(self):
         # Parse encrypted_message.

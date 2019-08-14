@@ -37,6 +37,7 @@ class TestScenarioBase:
         self.wallet_name = utils.generate_random_string("test_wallet")
         self.pool_handle = None
         self.wallet_handle = None
+        self.wallet_credentials = constant.wallet_credentials
         self.pool_genesis_txn_file = constant.pool_genesis_txn_file
         self.begin_time = time.time()
         utils.run_async_method(self.setup_steps)
@@ -67,4 +68,5 @@ class TestScenarioBase:
         await common.clean_up_pool_and_wallet(self.pool_name,
                                               self.pool_handle,
                                               self.wallet_name,
-                                              self.wallet_handle)
+                                              self.wallet_handle,
+                                              self.wallet_credentials)

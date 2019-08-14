@@ -21,8 +21,11 @@ class TestProverGetClaimsForProofReqForNoStoredClaimInWallet\
     async def test(self):
         # 1. Create wallet.
         # 2. Open wallet.
-        self.wallet_handle = await common.create_and_open_wallet_for_steps(
-            self.steps, self.wallet_name, self.pool_name)
+        self.wallet_handle = await \
+            common.create_and_open_wallet_for_steps(self.steps,
+                                                    self.wallet_name,
+                                                    self.pool_name,
+                                                    credentials=self.wallet_credentials)
 
         # 3. Get stored claims with proof request
         # and store result into 'returned_claims'.
@@ -30,12 +33,12 @@ class TestProverGetClaimsForProofReqForNoStoredClaimInWallet\
                             "and store result into 'returned_claims'.")
         proof_req = utils.create_proof_req(
             "1", "proof_req_1", "1.0",
-            requested_attrs={'attr1_referent': {'name': 'name'}},
+            requested_attributes={'attr1_referent': {'name': 'name'}},
             requested_predicates={
-                'predicate1_referent': {'attr_name': 'age', 'p_type': 'GE',
-                                        'value': 25}})
+                'predicate1_referent': {'name': 'age', 'p_type': '>=',
+                                        'p_value': 25}})
         returned_claims = await utils.perform(
-            self.steps, anoncreds.prover_get_claims_for_proof_req,
+            self.steps, anoncreds.prover_get_credentials_for_proof_req,
             self.wallet_handle, proof_req)
 
         returned_claims = json.loads(returned_claims)

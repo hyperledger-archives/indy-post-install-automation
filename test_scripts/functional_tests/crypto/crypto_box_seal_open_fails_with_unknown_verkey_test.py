@@ -21,7 +21,7 @@ class TestCryptoBoxSealOpenWithUnknownVerkey(CryptoTestBase):
         # 1. Create wallet.
         # 2. Open wallet.
         self.wallet_handle = await common.create_and_open_wallet_for_steps(
-            self.steps, self.wallet_name, self.pool_name)
+            self.steps, self.wallet_name, self.pool_name, credentials=self.wallet_credentials)
 
         # 3. Create sealed crypto box.
         self.steps.add_step("Create sealed crypto box")
@@ -34,7 +34,7 @@ class TestCryptoBoxSealOpenWithUnknownVerkey(CryptoTestBase):
         # verify that sealed crypto box cannot be opened.
         self.steps.add_step("Open sealed crypto box with unknown verkey and "
                             "verify that sealed crypto box cannot be opened")
-        error_code = ErrorCode.WalletNotFoundError
+        error_code = ErrorCode.WalletItemNotFound
         await utils.perform_with_expected_code(self.steps,
                                                crypto.anon_decrypt,
                                                self.wallet_handle,

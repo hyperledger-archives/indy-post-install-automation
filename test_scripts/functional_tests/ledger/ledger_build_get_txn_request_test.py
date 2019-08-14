@@ -7,10 +7,10 @@ Implementing test case GetTxnRequest with valid value.
 """
 import json
 
-from indy import did, ledger
+from indy import did, ledger, pool
 import pytest
 
-from utilities import common
+from utilities import common, utils
 from utilities.constant import seed_default_trustee, json_template
 from utilities.test_scenario_base import TestScenarioBase
 from utilities.utils import perform, verify_json
@@ -20,11 +20,13 @@ class TestGetTxnRequest(TestScenarioBase):
 
     @pytest.mark.asyncio
     async def test(self):
+        await  pool.set_protocol_version(2)
+
         # 1. Prepare pool and wallet. Get pool_handle, wallet_handle
         self.steps.add_step("Prepare pool and wallet")
         self.pool_handle, self.wallet_handle = await perform(
                                     self.steps, common.prepare_pool_and_wallet,
-                                    self.pool_name, self.wallet_name,
+                                    self.pool_name, self.wallet_name, self.wallet_credentials,
                                     self.pool_genesis_txn_file)
 
         # 2. Create and store did
@@ -40,10 +42,10 @@ class TestGetTxnRequest(TestScenarioBase):
         data = 1
         get_txn_req = json.loads(await perform(self.steps,
                                                ledger.build_get_txn_request,
-                                               submitter_did, data))
+                                               submitter_did, None, data))
 
         # 4. verify json response
         self.steps.add_step("Verify json get_txn request is correct.")
-        operation_template = '"type": "{}", "data": {}'.format(3, data)
-        expected_response = json_template(submitter_did, operation_template)
-        verify_json(self.steps, expected_response, get_txn_req)
+        err_msg = "Invalid request type"
+        utils.check(self.steps, error_message=err_msg,
+                    condition=lambda: get_txn_req['operation']['type'] == '3')
